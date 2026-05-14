@@ -1,53 +1,50 @@
-# Moodle Bitcoin Integration (BTCPay Server)
+# Moodle Coupon Discount (enrol_coupon_discount)
 
-This repository contains two Moodle plugins designed to integrate Bitcoin payments via BTCPay Server, including a coupon/discount system with a modern UI.
+This is a Moodle enrolment plugin that acts as a "middle layer" for payments. It allows users to apply coupon codes and receive discounts before proceeding to the actual payment gateway (such as BTCPay Server or Stripe).
 
-## Included Plugins
+## Installation
 
-1. **Enrolment BTC Coupon (enrol_btc_coupon)**: An enrollment plugin that adds a modern payment interface with coupon/discount support.
-2. **BTCPay Payment Gateway (paygw_btcpay)**: The core payment gateway that connects Moodle to BTCPay Server using the Greenfield API.
+Following the Moodle plugin convention, this repository must be installed in:
+
+**`public/enrol/coupon_discount`**
+
+### Using Git Submodules (Recommended for Librería Moodle)
+
+If you are using the `libreria-moodle` environment, add this repository as a submodule:
+
+```bash
+cd libreria-moodle
+git submodule add https://github.com/LibreriadeSatoshi/btcPayServer_coupon_discount.git public/enrol/coupon_discount
+git commit -m "Add coupon_discount enrolment layer"
+```
+
+Then, install it in Moodle by booting the environment and running the upgrade CLI:
+
+```bash
+docker compose exec -ti testmoodle php /root/libreria-moodle/admin/cli/upgrade.php --non-interactive
+```
+
+## Features
+
+- **Coupon System**: Apply percentage-based discounts to course enrolment fees.
+- **Modern UI**: Enhanced payment interface with a clean aesthetic and micro-animations.
+- **Gateway Agnostic**: Seamlessly integrates with any payment gateway enabled in Moodle (BTCPay, Stripe, PayPal, etc.) via the standard `core_payment` API.
+
+## Repository Structure
+
+As per the `libreria-moodle` development guidelines, this repository contains the plugin files at its root:
+
+```text
+moodle-coupon-discount/
+├── classes/          # Logic and payment service providers
+├── db/               # Database schema and access rules
+├── lang/             # Multi-language support
+├── lib.php           # Main enrolment plugin class
+├── styles.css        # Plugin-specific styles
+├── verify_coupon.php # Coupon validation endpoint
+├── version.php       # Plugin version and metadata
+└── README.md         # This file
+```
 
 ---
-
-## Installation via Moodle Dashboard
-
-To install these plugins using the Moodle UI, follow these steps:
-
-### 1. Prepare the ZIP files
-Moodle requires each plugin to be in its own ZIP file. 
-- Create a ZIP of the **enrol_btc_coupon** folder.
-- Create a ZIP of the **paygw_btcpay** folder.
-
-### 2. Upload to Moodle
-1. Log in to your Moodle instance as an **Administrator**.
-2. Go to **Site administration > Plugins > Install plugins**.
-3. Upload the `enrol_btc_coupon.zip` first. Follow the on-screen instructions to complete the installation.
-4. Repeat the process for `paygw_btcpay.zip`.
-
----
-
-## Configuration
-
-### BTCPay Server Setup
-1. Log in to your **BTCPay Server** instance.
-2. Create a **Store** and configure your Bitcoin wallet.
-3. Go to **Account > API Keys** and create a new Greenfield API Key with the following permissions:
-   - `btcpay.store.cancreateinvoice`
-   - `btcpay.store.canviewinvoices`
-4. Note down your **Store ID** and **API Key**.
-
-### Moodle Setup
-1. In Moodle, go to **Site administration > Payment > Accounts**.
-2. Create a new Payment Account (or edit an existing one).
-3. Enable the **BTCPay** gateway.
-4. Enter your **BTCPay Server URL**, **Store ID**, and **API Key**.
-5. Save changes.
-
----
-
-## Technical Features
-- **Native cURL**: Patched to bypass Moodle's internal proxy/security restrictions for better compatibility with external BTCPay instances.
-- **Modern UI**: Enhanced CSS for the coupon search box and payment modal, featuring a clean "Bitcoin Orange" aesthetic.
-- **SSRF Compatibility**: Works in both HTTP and HTTPS environments (HTTPS recommended for production).
-
-
+© 2026 Librería de Satoshi

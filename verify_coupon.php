@@ -12,7 +12,7 @@ $couponcode = optional_param('coupon', '', PARAM_TEXT);
 error_log("DEBUG: verify_coupon.php START - course: $courseid, instance: $instanceid, coupon: '$couponcode'");
 
 $course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
-$instance = $DB->get_record('enrol', array('id' => $instanceid, 'enrol' => 'btc_coupon'), '*', MUST_EXIST);
+$instance = $DB->get_record('enrol', array('id' => $instanceid, 'enrol' => 'coupon_discount'), '*', MUST_EXIST);
 
 // require_login($course);
 
@@ -22,20 +22,20 @@ $returnurl = new moodle_url('/enrol/index.php', array('id' => $courseid));
 
 if (empty($couponcode)) {
     // Clear coupon
-    unset($SESSION->btc_coupon[$instanceid]);
+    unset($SESSION->coupon_discount[$instanceid]);
     redirect($returnurl);
 }
 
 // Check coupon in DB
 try {
-    $coupon = $DB->get_record('enrol_btc_coupon_codes', array('code' => $couponcode));
+    $coupon = $DB->get_record('enrol_coupon_discount_codes', array('code' => $couponcode));
     if ($coupon) {
         error_log("DEBUG: Coupon found in DB! ID: " . $coupon->id);
         // Valid coupon, store in session
-        if (!isset($SESSION->btc_coupon)) {
-            $SESSION->btc_coupon = array();
+        if (!isset($SESSION->coupon_discount)) {
+            $SESSION->coupon_discount = array();
         }
-        $SESSION->btc_coupon[$instanceid] = array(
+        $SESSION->coupon_discount[$instanceid] = array(
             'code' => $coupon->code,
             'discount_percent' => (float)$coupon->discount_percent
         );
@@ -44,8 +44,8 @@ try {
     } else {
         error_log("DEBUG: Coupon NOT found in DB for code: '$couponcode'");
         // Invalid coupon
-        unset($SESSION->btc_coupon[$instanceid]);
-        redirect($returnurl, get_string('invalidcoupon', 'enrol_btc_coupon'), null, \core\output\notification::NOTIFY_ERROR);
+        unset($SESSION->coupon_discount[$instanceid]);
+        redirect($returnurl, get_string('invalidcoupon', 'enrol_coupon_discount'), null, \core\output\notification::NOTIFY_ERROR);
     }
 } catch (\Exception $e) {
     error_log("DEBUG: FATAL ERROR in verify_coupon.php: " . $e->getMessage());

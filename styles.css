@@ -2,7 +2,7 @@
  * Styles for the BTC Coupon Enrolment plugin
  */
 
-.enrol_btc_coupon_container {
+.enrol_coupon_discount_container {
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -14,7 +14,7 @@
     max-width: 500px;
 }
 
-.enrol_btc_coupon_container h3 {
+.enrol_coupon_discount_container h3 {
     font-size: 1.2rem;
     font-weight: 700;
     margin-bottom: 15px;
@@ -24,7 +24,7 @@
     gap: 10px;
 }
 
-.enrol_btc_coupon_price_box {
+.enrol_coupon_discount_price_box {
     margin-bottom: 20px;
     padding: 15px;
     background: rgba(0, 0, 0, 0.2);
@@ -32,30 +32,30 @@
     border-left: 4px solid #F7931A;
 }
 
-.enrol_btc_coupon_price_box .original_price {
+.enrol_coupon_discount_price_box .original_price {
     font-size: 0.9rem;
     text-decoration: line-through;
     opacity: 0.6;
 }
 
-.enrol_btc_coupon_price_box .discounted_price {
+.enrol_coupon_discount_price_box .discounted_price {
     font-size: 2rem;
     font-weight: 800;
     color: #ffffff;
     display: block;
 }
 
-.enrol_btc_coupon_form {
+.enrol_coupon_discount_form {
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
-.enrol_btc_coupon_input_group {
+.enrol_coupon_discount_input_group {
     position: relative;
 }
 
-.enrol_btc_coupon_input_group input[type="text"] {
+.enrol_coupon_discount_input_group input[type="text"] {
     width: 100%;
     padding: 12px 15px;
     background: #f8f9fa;
@@ -66,7 +66,7 @@
     transition: all 0.3s ease;
 }
 
-.enrol_btc_coupon_input_group input[type="text"]:focus {
+.enrol_coupon_discount_input_group input[type="text"]:focus {
     border-color: #F7931A;
     background: #ffffff;
     color: #000 !important;
@@ -74,7 +74,7 @@
     box-shadow: 0 0 15px rgba(247, 147, 26, 0.3);
 }
 
-.enrol_btc_coupon_btn_apply {
+.enrol_coupon_discount_btn_apply {
     background: linear-gradient(135deg, #F7931A 0%, #FFAB40 100%);
     border: none;
     border-radius: 10px;
@@ -85,12 +85,12 @@
     transition: all 0.3s transform;
 }
 
-.enrol_btc_coupon_btn_apply:hover {
+.enrol_coupon_discount_btn_apply:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(247, 147, 26, 0.4);
 }
 
-.enrol_btc_coupon_btn_pay {
+.enrol_coupon_discount_btn_pay {
     background: #ffffff;
     color: #000000;
     border: none;
@@ -108,12 +108,12 @@
     transition: all 0.3s ease;
 }
 
-.enrol_btc_coupon_btn_pay:hover {
+.enrol_coupon_discount_btn_pay:hover {
     background: #F7931A;
     color: #ffffff;
 }
 
-.enrol_btc_coupon_success_msg {
+.enrol_coupon_discount_success_msg {
     color: #4CAF50;
     font-weight: 600;
     font-size: 0.9rem;

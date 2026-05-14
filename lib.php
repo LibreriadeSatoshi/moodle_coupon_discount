@@ -3,7 +3,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-class enrol_btc_coupon_plugin extends enrol_plugin {
+class enrol_coupon_discount_plugin extends enrol_plugin {
 
     public function get_possible_currencies(): array {
         $codes = \core_payment\helper::get_supported_currencies();
@@ -81,7 +81,7 @@ class enrol_btc_coupon_plugin extends enrol_plugin {
 
         $cost = (float) $instance->cost;
         if (abs($cost) < 0.01) {
-            echo '<p>'.get_string('nocost', 'enrol_btc_coupon').'</p>';
+            echo '<p>'.get_string('nocost', 'enrol_coupon_discount').'</p>';
             return $OUTPUT->box(ob_get_clean());
         }
 
@@ -89,57 +89,57 @@ class enrol_btc_coupon_plugin extends enrol_plugin {
         $discount_percent = 0;
         $couponcode = '';
         $original_cost = $cost;
-        if (isset($SESSION->btc_coupon[$instance->id])) {
-            $couponcode = $SESSION->btc_coupon[$instance->id]['code'];
-            $discount_percent = $SESSION->btc_coupon[$instance->id]['discount_percent'];
+        if (isset($SESSION->coupon_discount[$instance->id])) {
+            $couponcode = $SESSION->coupon_discount[$instance->id]['code'];
+            $discount_percent = $SESSION->coupon_discount[$instance->id]['discount_percent'];
             $cost = $cost - ($cost * ($discount_percent / 100));
         }
 
         $cost_str = \core_payment\helper::get_cost_as_string($original_cost, $instance->currency);
         $discounted_cost_str = \core_payment\helper::get_cost_as_string($cost, $instance->currency);
 
-        echo '<div class="enrol_btc_coupon_container">';
-        echo '<h3><i class="fa fa-btc"></i> ' . get_string('pluginname', 'enrol_btc_coupon') . '</h3>';
+        echo '<div class="enrol_coupon_discount_container">';
+        echo '<h3><i class="fa fa-btc"></i> ' . get_string('pluginname', 'enrol_coupon_discount') . '</h3>';
 
-        echo '<div class="enrol_btc_coupon_price_box">';
+        echo '<div class="enrol_coupon_discount_price_box">';
         if ($discount_percent > 0) {
             echo '<span class="original_price">' . $cost_str . '</span>';
             echo '<span class="discounted_price animate_price">' . $discounted_cost_str . '</span>';
-            echo '<div class="enrol_btc_coupon_success_msg"><i class="fa fa-check-circle"></i> ' . get_string('couponapplied', 'enrol_btc_coupon', $discount_percent.'%') . '</div>';
+            echo '<div class="enrol_coupon_discount_success_msg"><i class="fa fa-check-circle"></i> ' . get_string('couponapplied', 'enrol_coupon_discount', $discount_percent.'%') . '</div>';
         } else {
             echo '<span class="discounted_price">' . $cost_str . '</span>';
         }
         echo '</div>';
 
-        $applyurl = new moodle_url('/enrol/btc_coupon/verify_coupon.php');
-        echo '<form action="'.$applyurl.'" method="post" class="enrol_btc_coupon_form">';
+        $applyurl = new moodle_url('/enrol/coupon_discount/verify_coupon.php');
+        echo '<form action="'.$applyurl.'" method="post" class="enrol_coupon_discount_form">';
         echo '<input type="hidden" name="id" value="'.$instance->courseid.'">';
         echo '<input type="hidden" name="instanceid" value="'.$instance->id.'">';
         
-        echo '<div class="enrol_btc_coupon_input_group">';
-        echo '<input type="text" name="coupon" placeholder="'.get_string('couponcode', 'enrol_btc_coupon').'" value="'.s($couponcode).'" autocomplete="off">';
+        echo '<div class="enrol_coupon_discount_input_group">';
+        echo '<input type="text" name="coupon" placeholder="'.get_string('couponcode', 'enrol_coupon_discount').'" value="'.s($couponcode).'" autocomplete="off">';
         echo '</div>';
         
-        echo '<button type="submit" class="enrol_btc_coupon_btn_apply">'.get_string('applycoupon', 'enrol_btc_coupon').'</button>';
+        echo '<button type="submit" class="enrol_coupon_discount_btn_apply">'.get_string('applycoupon', 'enrol_coupon_discount').'</button>';
         echo '</form>';
 
         // Payment button
-        $successurl = \enrol_btc_coupon\payment\service_provider::get_success_url('btc_coupon', $instance->id)->out(false);
-        $description = get_string('pluginname', 'enrol_btc_coupon') . ' - ' . format_string($course->fullname, true, ['context' => $context]);
+        $successurl = \enrol_coupon_discount\payment\service_provider::get_success_url('coupon_discount', $instance->id)->out(false);
+        $description = get_string('pluginname', 'enrol_coupon_discount') . ' - ' . format_string($course->fullname, true, ['context' => $context]);
         
-        echo '<div class="enrol_btc_coupon_payment_region">';
+        echo '<div class="enrol_coupon_discount_payment_region">';
         if (isguestuser() || !isloggedin()) {
             echo '<div class="mdl-align"><p>You must log in to pay</p></div>';
         } else {
-            echo '<button class="enrol_btc_coupon_btn_pay" type="button" id="gateways-modal-trigger-btc" ' .
+            echo '<button class="enrol_coupon_discount_btn_pay" type="button" id="gateways-modal-trigger-btc" ' .
                  'data-action="core_payment/triggerPayment" ' .
-                 'data-component="enrol_btc_coupon" ' .
-                 'data-paymentarea="btc_coupon" ' .
+                 'data-component="enrol_coupon_discount" ' .
+                 'data-paymentarea="coupon_discount" ' .
                  'data-itemid="'.$instance->id.'" ' .
                  'data-cost="'.$discounted_cost_str.'" ' .
                  'data-successurl="'.$successurl.'" ' .
                  'data-description="'.$description.'">' . 
-                 '<i class="fa fa-credit-card"></i> ' . get_string('sendpaymentbutton', 'enrol_btc_coupon') . '</button>';
+                 '<i class="fa fa-credit-card"></i> ' . get_string('sendpaymentbutton', 'enrol_coupon_discount') . '</button>';
         }
         echo '</div>';
         
@@ -156,7 +156,7 @@ class enrol_btc_coupon_plugin extends enrol_plugin {
         $mform->setType('name', PARAM_TEXT);
 
         $options = array(ENROL_INSTANCE_ENABLED  => get_string('yes'), ENROL_INSTANCE_DISABLED => get_string('no'));
-        $mform->addElement('select', 'status', get_string('status', 'enrol_btc_coupon'), $options);
+        $mform->addElement('select', 'status', get_string('status', 'enrol_coupon_discount'), $options);
         $mform->setDefault('status', ENROL_INSTANCE_ENABLED);
 
         $accounts = \core_payment\helper::get_payment_accounts_menu($context);
@@ -167,24 +167,24 @@ class enrol_btc_coupon_plugin extends enrol_plugin {
             $mform->setType('customint1', PARAM_INT);
         }
 
-        $mform->addElement('text', 'cost', get_string('cost', 'enrol_btc_coupon'), array('size' => 4));
+        $mform->addElement('text', 'cost', get_string('cost', 'enrol_coupon_discount'), array('size' => 4));
         $mform->setType('cost', PARAM_RAW);
         $mform->setDefault('cost', 0);
 
         $supportedcurrencies = $this->get_possible_currencies();
-        $mform->addElement('select', 'currency', get_string('currency', 'enrol_btc_coupon'), $supportedcurrencies);
+        $mform->addElement('select', 'currency', get_string('currency', 'enrol_coupon_discount'), $supportedcurrencies);
 
         $roles = get_default_enrol_roles($context);
-        $mform->addElement('select', 'roleid', get_string('assignrole', 'enrol_btc_coupon'), $roles);
+        $mform->addElement('select', 'roleid', get_string('assignrole', 'enrol_coupon_discount'), $roles);
 
         $options = array('optional' => true, 'defaultunit' => 86400);
-        $mform->addElement('duration', 'enrolperiod', get_string('enrolperiod', 'enrol_btc_coupon'), $options);
+        $mform->addElement('duration', 'enrolperiod', get_string('enrolperiod', 'enrol_coupon_discount'), $options);
 
         $options = array('optional' => true);
-        $mform->addElement('date_time_selector', 'enrolstartdate', get_string('enrolstartdate', 'enrol_btc_coupon'), $options);
+        $mform->addElement('date_time_selector', 'enrolstartdate', get_string('enrolstartdate', 'enrol_coupon_discount'), $options);
 
         $options = array('optional' => true);
-        $mform->addElement('date_time_selector', 'enrolenddate', get_string('enrolenddate', 'enrol_btc_coupon'), $options);
+        $mform->addElement('date_time_selector', 'enrolenddate', get_string('enrolenddate', 'enrol_coupon_discount'), $options);
     }
 
     public function edit_instance_validation($data, $files, $instance, $context) {

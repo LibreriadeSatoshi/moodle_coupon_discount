@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="enrol/btc_coupon/db" VERSION="20260506" COMMENT="XMLDB file for Moodle enrol_btc_coupon"
+<XMLDB PATH="enrol/coupon_discount/db" VERSION="20260506" COMMENT="XMLDB file for Moodle enrol_coupon_discount"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="enrol_btc_coupon_codes" COMMENT="Stores the coupon codes for Bitcoin payments">
+    <TABLE NAME="enrol_coupon_discount_codes" COMMENT="Stores the coupon codes for Bitcoin payments">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="code" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" COMMENT="The actual coupon code string"/>
