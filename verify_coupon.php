@@ -12,7 +12,7 @@ $couponcode = optional_param('coupon', '', PARAM_TEXT);
 $course   = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $instance = $DB->get_record('enrol', ['id' => $instanceid, 'enrol' => 'coupon_discount'], '*', MUST_EXIST);
 
-require_login($course);
+require_login();
 require_sesskey();
 
 $returnurl = new moodle_url('/enrol/index.php', ['id' => $courseid]);
