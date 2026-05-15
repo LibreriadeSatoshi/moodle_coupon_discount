@@ -21,3 +21,17 @@ $string['assignrole'] = 'Assign role';
 $string['enrolenddate'] = 'End date';
 $string['enrolenddaterror'] = 'Enrolment end date cannot be earlier than start date';
 $string['enrolstartdate'] = 'Start date';
+$string['pluginname_desc'] = 'Allows course enrolment with percentage-based coupon discounts.';
+$string['managecoupons'] = 'Manage coupon codes';
+$string['addcoupon'] = 'Add coupon';
+$string['couponadded'] = 'Coupon added successfully.';
+$string['coupondeleted'] = 'Coupon deleted successfully.';
+$string['confirmdeletecoupon'] = 'Are you sure you want to delete this coupon?';
+$string['invaliddiscount'] = 'Discount must be between 1 and 100.';
+$string['duplicatecoupon'] = 'A coupon with this code already exists.';
+$string['nocoupons'] = 'No coupon codes have been created yet.';
+$string['discount_percent'] = 'Discount (%)';
+$string['timecreated'] = 'Created';
+$string['actions'] = 'Actions';
+$string['enrolincourse'] = 'Enrolment to course';
+

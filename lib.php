@@ -99,7 +99,7 @@ class enrol_coupon_discount_plugin extends enrol_plugin {
         $discounted_cost_str = \core_payment\helper::get_cost_as_string($cost, $instance->currency);
 
         echo '<div class="enrol_coupon_discount_container">';
-        echo '<h3><i class="fa fa-btc"></i> ' . get_string('pluginname', 'enrol_coupon_discount') . '</h3>';
+        echo '<h3>' . get_string('enrolincourse', 'enrol_coupon_discount') . ': ' . format_string($course->fullname, true, ['context' => $context]) . '</h3>';
 
         echo '<div class="enrol_coupon_discount_price_box">';
         if ($discount_percent > 0) {
