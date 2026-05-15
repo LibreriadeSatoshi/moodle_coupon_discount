@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="enrol/coupon_discount/db" VERSION="20260506" COMMENT="XMLDB file for Moodle enrol_coupon_discount"
+<XMLDB PATH="enrol/coupon_discount/db" VERSION="20260515" COMMENT="XMLDB file for Moodle enrol_coupon_discount"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -16,5 +16,22 @@
         <KEY NAME="code_uk" TYPE="unique" FIELDS="code"/>
       </KEYS>
     </TABLE>
+    <TABLE NAME="enrol_coupon_discount_usage" COMMENT="Tracks coupon usage per user per enrolment instance">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="instanceid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the enrol instance"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the user applying the coupon"/>
+        <FIELD NAME="couponid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the coupon used"/>
+        <FIELD NAME="discount_percent" TYPE="number" LENGTH="5" DECIMALS="2" NOTNULL="true" DEFAULT="0.00" SEQUENCE="false" COMMENT="Discount percentage applied"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="instanceid_userid" UNIQUE="false" FIELDS="instanceid, userid"/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>
+

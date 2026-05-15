@@ -6,16 +6,26 @@ namespace enrol_coupon_discount\payment;
 class service_provider implements \core_payment\local\callback\service_provider {
 
     public static function get_payable(string $paymentarea, int $instanceid): \core_payment\local\entities\payable {
-        global $DB, $SESSION;
+        global $DB, $SESSION, $USER;
 
         $instance = $DB->get_record('enrol', ['enrol' => 'coupon_discount', 'id' => $instanceid], '*', MUST_EXIST);
 
         $cost = (float) $instance->cost;
 
-        // Apply discount if there is a validated coupon in the session
+        // 1. Try to get the discount from the session (fastest path).
         if (isset($SESSION->coupon_discount[$instanceid])) {
-            $discount_percent = $SESSION->coupon_discount[$instanceid]['discount_percent'];
-            $cost = $cost - ($cost * ($discount_percent / 100));
+            $discount = $SESSION->coupon_discount[$instanceid]['discount_percent'];
+            $cost     = $cost - ($cost * ($discount / 100));
+
+        // 2. Fallback: read from DB in case the session was lost (e.g. after gateway redirect).
+        } elseif (isloggedin() && !isguestuser()) {
+            $usage = $DB->get_record('enrol_coupon_discount_usage', [
+                'instanceid' => $instanceid,
+                'userid'     => $USER->id,
+            ]);
+            if ($usage) {
+                $cost = $cost - ($cost * ($usage->discount_percent / 100));
+            }
         }
 
         return new \core_payment\local\entities\payable($cost, $instance->currency, $instance->customint1);
@@ -31,7 +41,7 @@ class service_provider implements \core_payment\local\callback\service_provider 
         global $DB;
 
         $instance = $DB->get_record('enrol', ['enrol' => 'coupon_discount', 'id' => $instanceid], '*', MUST_EXIST);
-        $plugin = enrol_get_plugin('coupon_discount');
+        $plugin   = enrol_get_plugin('coupon_discount');
 
         if ($instance->enrolperiod) {
             $timestart = time();
@@ -42,6 +52,12 @@ class service_provider implements \core_payment\local\callback\service_provider 
         }
 
         $plugin->enrol_user($instance, $userid, $instance->roleid, $timestart, $timeend);
+
+        // Clean up the usage record after successful enrolment.
+        $DB->delete_records('enrol_coupon_discount_usage', [
+            'instanceid' => $instanceid,
+            'userid'     => $userid,
+        ]);
 
         return true;
     }
