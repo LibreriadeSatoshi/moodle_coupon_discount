@@ -113,6 +113,7 @@ class enrol_coupon_discount_plugin extends enrol_plugin {
 
         $applyurl = new moodle_url('/enrol/coupon_discount/verify_coupon.php');
         echo '<form action="'.$applyurl.'" method="post" class="enrol_coupon_discount_form">';
+echo '<input type="hidden" name="sesskey" value="'.sesskey().'">';
         echo '<input type="hidden" name="id" value="'.$instance->courseid.'">';
         echo '<input type="hidden" name="instanceid" value="'.$instance->id.'">';
         
