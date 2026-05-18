@@ -3,9 +3,13 @@ This is a Moodle enrolment plugin that acts as a "middle layer" for payments. It
 ## How it Works
 The payment flow follows this pipeline:
 
-```bash 
-Base Price (per course) → Apply Coupon (% discount) → Final Price → Payment Gateway
-``` 
+```mermaid
+graph LR
+    A[Base Price per course] --> B[Apply Coupon for percent discount]
+    B --> C[Final Price]
+    C --> D[Payment Gateway]
+```
+
 
 1. **Base Price** — The course administrator sets a base price and currency when adding the enrolment method to a course.
 2. **Apply Coupon** — The student enters a coupon code on the enrolment page. If valid, a percentage discount is applied and persisted (both in the session and in the database) to survive external gateway redirects.
@@ -46,4 +50,9 @@ docker compose exec -ti testmoodle php /root/libreria-moodle/admin/cli/upgrade.p
 | :--- | :--- |
 | `enrol_coupon_discount_codes` | Stores available coupon codes and their discount percentages. |
 | `enrol_coupon_discount_usage` | Tracks which coupon a user has applied for a given enrolment instance, persisting across gateway redirects. |
+
+## License
+
+This project is open-source and licensed under the [MIT License](LICENSE).
+
 
