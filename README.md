@@ -18,24 +18,48 @@ graph LR
 
 ## Installation
 
-Following the Moodle plugin convention, this repository must be installed in:
+Following Moodle's standard plugin conventions, this plugin must be installed in the **`enrol/coupon_discount`** directory of your Moodle installation.
 
-**`public/enrol/coupon_discount`**
+### 1. Clone the Repository
 
-### Using Git Submodules (Recommended for Librería Moodle)
-
-If you are using the `libreria-moodle` environment, add this repository as a submodule:
+Navigate to your Moodle installation root and clone this repository:
 
 ```bash
-cd libreria-moodle
-git submodule add https://github.com/LibreriadeSatoshi/btcPayServer_coupon_discount.git public/enrol/coupon_discount
-git commit -m "this is my commit message for the coupon discount plugin"
+cd /path/to/your/moodle
+git clone https://github.com/LibreriadeSatoshi/btcPayServer_coupon_discount.git enrol/coupon_discount
 ```
 
-Then, install it in Moodle by booting the environment and running the upgrade CLI:
+### 2. Complete the Installation/Upgrade
+
+You can install the plugin database tables in either of two ways:
+
+#### Option A: Via the Web Interface
+1. Log in to your Moodle site as a Site Administrator.
+2. Go to **Site administration > Notifications**.
+3. Moodle will automatically detect the new plugin. Follow the on-screen prompts to complete the database upgrade.
+
+#### Option B: Via Command Line (CLI)
+If you prefer the CLI or have a large site, run Moodle's upgrade script from your Moodle root folder:
 
 ```bash
-docker compose exec -ti testmoodle php /root/libreria-moodle/admin/cli/upgrade.php --non-interactive
+php admin/cli/upgrade.php
+```
+
+---
+
+### Installing as a Git Submodule
+
+If you manage your Moodle project using Git, you can add this plugin as a submodule:
+
+```bash
+# From your main Git repository root
+git submodule add https://github.com/LibreriadeSatoshi/btcPayServer_coupon_discount.git enrol/coupon_discount
+```
+
+Then, trigger the database upgrade either via the Web Interface or via CLI:
+
+```bash
+php admin/cli/upgrade.php
 ```
 
 ## Features
