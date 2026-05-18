@@ -5,6 +5,9 @@ defined('MOODLE_INTERNAL') || die();
 
 class enrol_coupon_discount_plugin extends enrol_plugin {
 
+    public function get_name() {
+        return 'coupon_discount';
+    }
     public function get_possible_currencies(): array {
         $codes = \core_payment\helper::get_supported_currencies();
         $currencies = [];
@@ -31,6 +34,25 @@ class enrol_coupon_discount_plugin extends enrol_plugin {
 
     public function show_enrolme_link(stdClass $instance) {
         return ($instance->status == ENROL_INSTANCE_ENABLED);
+    }
+
+    public function can_delete_instance($instance) {
+        $context = context_course::instance($instance->courseid);
+        return has_capability('enrol/coupon_discount:config', $context);
+    }
+
+    public function get_action_icons(stdClass $instance) {
+        global $OUTPUT;
+
+        $icons = parent::get_action_icons($instance);
+        $context = context_course::instance($instance->courseid);
+
+        if (has_capability('enrol/coupon_discount:manage', $context)) {
+            $enrolusersurl = new moodle_url('/enrol/coupon_discount/manage.php', ['enrolid' => $instance->id, 'id' => $instance->courseid]);
+            $icons[] = $OUTPUT->action_icon($enrolusersurl, new pix_icon('t/enrolusers', get_string('enrolusers', 'enrol_coupon_discount')));
+        }
+
+        return $icons;
     }
 
     public function can_add_instance($courseid) {

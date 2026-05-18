@@ -36,3 +36,5 @@ $string['enrolincourse'] = 'Matricularse en el curso';
 $string['allowed_emails'] = 'Correos permitidos';
 $string['allowed_emails_desc'] = 'Opcional. Lista de correos separados por comas que pueden usar este cupón. Si se deja en blanco, todos los usuarios pueden usarlo.';
 $string['notallowedcoupon'] = 'Este cupón no está asignado a tu cuenta.';
+$string['enrolusers'] = 'Matricular usuarios';
+$string['manualenrolment'] = 'Matriculación manual';

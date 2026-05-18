@@ -37,4 +37,6 @@ $string['enrolincourse'] = 'Enrolment to course';
 $string['allowed_emails'] = 'Allowed Emails';
 $string['allowed_emails_desc'] = 'Optional. Comma-separated list of emails allowed to use this coupon. Leave blank to allow any user.';
 $string['notallowedcoupon'] = 'This coupon is not assigned to your account.';
+$string['enrolusers'] = 'Enrol users';
+$string['manualenrolment'] = 'Manual enrolment';
 
