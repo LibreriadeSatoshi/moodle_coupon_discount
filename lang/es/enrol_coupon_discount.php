@@ -1,0 +1,38 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+
+$string['pluginname'] = 'Pago con Descuento de Cupón';
+$string['pluginname_desc'] = 'Permite la matriculación a cursos con descuentos basados en porcentajes mediante cupones.';
+$string['couponcode'] = 'Código de Cupón';
+$string['applycoupon'] = 'Aplicar Cupón';
+$string['couponapplied'] = 'Cupón aplicado con éxito. Descuento: {$a}';
+$string['invalidcoupon'] = 'Código de cupón inválido o expirado.';
+$string['cost'] = 'Costo de inscripción';
+$string['currency'] = 'Moneda';
+$string['customint1'] = 'Cuenta de pago';
+$string['defaultrole'] = 'Asignación de rol por defecto';
+$string['enrolperiod'] = 'Duración de la matrícula';
+$string['enrolperiod_desc'] = 'Duración por defecto de la validez de la matrícula. Si se establece en cero, la duración de la matrícula será ilimitada por defecto.';
+$string['sendpaymentbutton'] = 'Proceder al Pago';
+$string['status'] = 'Permitir inscripciones con cupones';
+$string['status_desc'] = 'Permite a los usuarios usar cupones y pagar para inscribirse en un curso por defecto.';
+$string['nocost'] = '¡No hay ningún costo asociado con la inscripción en este curso!';
+$string['assignrole'] = 'Asignar rol';
+$string['enrolenddate'] = 'Fecha de finalización';
+$string['enrolenddaterror'] = 'La fecha de finalización de la matrícula no puede ser anterior a la fecha de inicio';
+$string['enrolstartdate'] = 'Fecha de inicio';
+$string['managecoupons'] = 'Gestionar códigos de cupones';
+$string['addcoupon'] = 'Agregar cupón';
+$string['couponadded'] = 'Cupón agregado con éxito.';
+$string['coupondeleted'] = 'Cupón eliminado con éxito.';
+$string['confirmdeletecoupon'] = '¿Estás seguro de que deseas eliminar este cupón?';
+$string['invaliddiscount'] = 'El descuento debe estar entre 1 y 100.';
+$string['duplicatecoupon'] = 'Ya existe un cupón con este código.';
+$string['nocoupons'] = 'Aún no se han creado códigos de cupones.';
+$string['discount_percent'] = 'Descuento (%)';
+$string['timecreated'] = 'Creado';
+$string['actions'] = 'Acciones';
+$string['enrolincourse'] = 'Matricularse en el curso';
+$string['allowed_emails'] = 'Correos permitidos';
+$string['allowed_emails_desc'] = 'Opcional. Lista de correos separados por comas que pueden usar este cupón. Si se deja en blanco, todos los usuarios pueden usarlo.';
+$string['notallowedcoupon'] = 'Este cupón no está asignado a tu cuenta.';

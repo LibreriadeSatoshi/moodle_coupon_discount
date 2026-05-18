@@ -14,7 +14,7 @@ if ($ADMIN->fulltree) {
     $link = html_writer::link($url, get_string('managecoupons', 'enrol_coupon_discount'));
     $settings->add(new admin_setting_description(
         'enrol_coupon_discount_managecoupons',
-        get_string('managecoupons', 'enrol_coupon_discount'),
+        '',
         $link
     ));
 }

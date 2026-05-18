@@ -9,6 +9,7 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="code" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" COMMENT="The actual coupon code string"/>
         <FIELD NAME="discount_percent" TYPE="number" LENGTH="5" DECIMALS="2" NOTNULL="true" DEFAULT="0.00" SEQUENCE="false" COMMENT="Percentage discount (e.g. 10.00 for 10%)"/>
+        <FIELD NAME="allowed_emails" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Comma-separated list of allowed user emails. Empty means all users."/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>

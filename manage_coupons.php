@@ -27,6 +27,20 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     require_sesskey();
     $code     = required_param('code', PARAM_ALPHANUMEXT);
     $discount = required_param('discount_percent', PARAM_FLOAT);
+    $rawemails = optional_param('allowed_emails', '', PARAM_TEXT);
+
+    // Sanitize emails: remove spaces, convert to lowercase.
+    $emails_array = [];
+    if (!empty($rawemails)) {
+        $parts = explode(',', $rawemails);
+        foreach ($parts as $part) {
+            $email = strtolower(trim($part));
+            if (!empty($email) && validate_email($email)) {
+                $emails_array[] = $email;
+            }
+        }
+    }
+    $clean_emails = implode(',', $emails_array);
 
     if ($discount < 1 || $discount > 100) {
         $error = get_string('invaliddiscount', 'enrol_coupon_discount');
@@ -36,6 +50,7 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $record                   = new stdClass();
         $record->code             = strtoupper(trim($code));
         $record->discount_percent = $discount;
+        $record->allowed_emails   = $clean_emails;
         $record->timecreated      = time();
         $DB->insert_record('enrol_coupon_discount_codes', $record);
         redirect($PAGE->url, get_string('couponadded', 'enrol_coupon_discount'), null, \core\output\notification::NOTIFY_SUCCESS);
@@ -86,6 +101,18 @@ echo html_writer::empty_tag('input', [
 ]);
 echo html_writer::end_div();
 
+echo html_writer::start_div('form-group mb-3');
+echo html_writer::tag('label', get_string('allowed_emails', 'enrol_coupon_discount'), ['for' => 'allowed_emails']);
+echo html_writer::tag('div', get_string('allowed_emails_desc', 'enrol_coupon_discount'), ['class' => 'text-muted small mb-1']);
+echo html_writer::tag('textarea', '', [
+    'name'        => 'allowed_emails',
+    'id'          => 'allowed_emails',
+    'class'       => 'form-control',
+    'rows'        => '2',
+    'placeholder' => 'ejemplo@correo.com, otro@correo.com',
+]);
+echo html_writer::end_div();
+
 echo html_writer::empty_tag('input', ['type' => 'submit', 'value' => get_string('addcoupon', 'enrol_coupon_discount'), 'class' => 'btn btn-primary']);
 echo html_writer::end_div();
 echo html_writer::end_tag('form');
@@ -98,6 +125,7 @@ if ($coupons) {
     $table->head      = [
         get_string('couponcode', 'enrol_coupon_discount'),
         get_string('discount_percent', 'enrol_coupon_discount'),
+        get_string('allowed_emails', 'enrol_coupon_discount'),
         get_string('timecreated', 'enrol_coupon_discount'),
         get_string('actions', 'enrol_coupon_discount'),
     ];
@@ -110,9 +138,11 @@ if ($coupons) {
             get_string('delete'),
             ['class' => 'btn btn-sm btn-danger', 'onclick' => 'return confirm("' . get_string('confirmdeletecoupon', 'enrol_coupon_discount') . '")']
         );
+        $allowed_display = empty($coupon->allowed_emails) ? html_writer::tag('span', 'Todos', ['class' => 'badge badge-success bg-success']) : s($coupon->allowed_emails);
         $table->data[] = [
             html_writer::tag('strong', $coupon->code),
             $coupon->discount_percent . '%',
+            $allowed_display,
             userdate($coupon->timecreated),
             $deletelink,
         ];

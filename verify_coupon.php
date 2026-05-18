@@ -36,6 +36,16 @@ if (!$coupon) {
     redirect($returnurl, get_string('invalidcoupon', 'enrol_coupon_discount'), null, \core\output\notification::NOTIFY_ERROR);
 }
 
+// Check if coupon is restricted to specific users.
+if (!empty($coupon->allowed_emails)) {
+    $allowed = explode(',', $coupon->allowed_emails);
+    $useremail = strtolower(trim($USER->email));
+    if (!in_array($useremail, $allowed, true)) {
+        unset($SESSION->coupon_discount[$instanceid]);
+        redirect($returnurl, get_string('notallowedcoupon', 'enrol_coupon_discount'), null, \core\output\notification::NOTIFY_ERROR);
+    }
+}
+
 // Valid coupon — store in session.
 if (!isset($SESSION->coupon_discount)) {
     $SESSION->coupon_discount = [];
