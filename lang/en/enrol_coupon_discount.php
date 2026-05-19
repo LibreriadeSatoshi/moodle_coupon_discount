@@ -2,7 +2,6 @@
 // This file is part of Moodle - http://moodle.org/
 
 $string['pluginname'] = 'Coupon Discount Payment';
-$string['pluginname_desc'] = 'Enrolment plugin that adds a coupon/discount layer before processing payments via standard gateways (BTCPay, Stripe, etc.).';
 $string['couponcode'] = 'Coupon Code';
 $string['applycoupon'] = 'Apply Coupon';
 $string['couponapplied'] = 'Coupon applied successfully. Discount: {$a}';

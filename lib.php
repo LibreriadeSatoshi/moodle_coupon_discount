@@ -3,7 +3,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-class enrol_coupon_discount_plugin extends enrol_plugin {
+class enrol_coupon_discount_plugin extends enrol_plugin { // NOSONAR Moodle enrol plugin naming convention.
 
     public function get_name() {
         return 'coupon_discount';
@@ -33,7 +33,7 @@ class enrol_coupon_discount_plugin extends enrol_plugin {
     }
 
     public function show_enrolme_link(stdClass $instance) {
-        return ($instance->status == ENROL_INSTANCE_ENABLED);
+        return $instance->status == ENROL_INSTANCE_ENABLED;
     }
 
     public function can_delete_instance($instance) {
@@ -84,19 +84,14 @@ class enrol_coupon_discount_plugin extends enrol_plugin {
     public function enrol_page_hook(stdClass $instance) {
         global $USER, $OUTPUT, $DB, $CFG, $SESSION;
 
+        $alreadyenrolled = $DB->record_exists('user_enrolments', array('userid' => $USER->id, 'enrolid' => $instance->id));
+        $notstarted = $instance->enrolstartdate != 0 && $instance->enrolstartdate > time();
+        $ended = $instance->enrolenddate != 0 && $instance->enrolenddate < time();
+        if ($alreadyenrolled || $notstarted || $ended) {
+            return '';
+        }
+
         ob_start();
-
-        if ($DB->record_exists('user_enrolments', array('userid' => $USER->id, 'enrolid' => $instance->id))) {
-            return ob_get_clean();
-        }
-
-        if ($instance->enrolstartdate != 0 && $instance->enrolstartdate > time()) {
-            return ob_get_clean();
-        }
-
-        if ($instance->enrolenddate != 0 && $instance->enrolenddate < time()) {
-            return ob_get_clean();
-        }
 
         $course = $DB->get_record('course', array('id' => $instance->courseid));
         $context = context_course::instance($course->id);
@@ -138,18 +133,18 @@ class enrol_coupon_discount_plugin extends enrol_plugin {
 echo '<input type="hidden" name="sesskey" value="'.sesskey().'">';
         echo '<input type="hidden" name="id" value="'.$instance->courseid.'">';
         echo '<input type="hidden" name="instanceid" value="'.$instance->id.'">';
-        
+
         echo '<div class="enrol_coupon_discount_input_group">';
         echo '<input type="text" name="coupon" placeholder="'.get_string('couponcode', 'enrol_coupon_discount').'" value="'.s($couponcode).'" autocomplete="off">';
         echo '</div>';
-        
+
         echo '<button type="submit" class="enrol_coupon_discount_btn_apply">'.get_string('applycoupon', 'enrol_coupon_discount').'</button>';
         echo '</form>';
 
         // Payment button
         $successurl = \enrol_coupon_discount\payment\service_provider::get_success_url('coupon_discount', $instance->id)->out(false);
         $description = get_string('pluginname', 'enrol_coupon_discount') . ' - ' . format_string($course->fullname, true, ['context' => $context]);
-        
+
         echo '<div class="enrol_coupon_discount_payment_region">';
         if (isguestuser() || !isloggedin()) {
             echo '<div class="mdl-align"><p>You must log in to pay</p></div>';
@@ -161,13 +156,13 @@ echo '<input type="hidden" name="sesskey" value="'.sesskey().'">';
                  'data-itemid="'.$instance->id.'" ' .
                  'data-cost="'.$discounted_cost_str.'" ' .
                  'data-successurl="'.$successurl.'" ' .
-                 'data-description="'.$description.'">' . 
+                 'data-description="'.$description.'">' .
                  '<i class="fa fa-credit-card"></i> ' . get_string('sendpaymentbutton', 'enrol_coupon_discount') . '</button>';
         }
         echo '</div>';
-        
+
         echo '</div>'; // End container
-        
+
         global $PAGE;
         $PAGE->requires->js_call_amd('core_payment/gateways_modal', 'init');
 

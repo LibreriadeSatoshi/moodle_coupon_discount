@@ -3,7 +3,7 @@
  */
 
 .enrol_coupon_discount_container {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(20, 20, 30, 0.92);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
@@ -80,7 +80,7 @@
     border: none;
     border-radius: 10px;
     padding: 12px;
-    color: #fff;
+    color: #1a1a1a;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.3s transform;
@@ -111,7 +111,7 @@
 
 .enrol_coupon_discount_btn_pay:hover {
     background: #F7931A;
-    color: #ffffff;
+    color: #1a1a1a;
 }
 
 .enrol_coupon_discount_success_msg {
