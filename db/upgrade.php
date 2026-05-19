@@ -1,7 +1,7 @@
 <?php
 // This file is part of Moodle - http://moodle.org/
 
-function xmldb_enrol_coupon_discount_upgrade($oldversion) {
+function xmldb_enrol_coupon_discount_upgrade($oldversion) { // NOSONAR Moodle upgrade hook naming convention.
     global $DB;
 
     $dbman = $DB->get_manager();

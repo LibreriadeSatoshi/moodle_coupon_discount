@@ -3,7 +3,7 @@
 
 namespace enrol_coupon_discount\payment;
 
-class service_provider implements \core_payment\local\callback\service_provider {
+class service_provider implements \core_payment\local\callback\service_provider { // NOSONAR Moodle payment subsystem naming convention.
 
     public static function get_payable(string $paymentarea, int $instanceid): \core_payment\local\entities\payable {
         global $DB, $SESSION, $USER;

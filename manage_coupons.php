@@ -1,7 +1,7 @@
 <?php
 // This file is part of Moodle - http://moodle.org/
 
-require_once('../../config.php');
+require_once '../../config.php';
 
 require_login();
 require_capability('moodle/site:config', context_system::instance());
@@ -44,7 +44,7 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($discount < 1 || $discount > 100) {
         $error = get_string('invaliddiscount', 'enrol_coupon_discount');
-    } else if ($DB->record_exists('enrol_coupon_discount_codes', ['code' => $code])) {
+    } elseif ($DB->record_exists('enrol_coupon_discount_codes', ['code' => $code])) {
         $error = get_string('duplicatecoupon', 'enrol_coupon_discount');
     } else {
         $record                   = new stdClass();

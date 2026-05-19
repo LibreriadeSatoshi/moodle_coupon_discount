@@ -1,7 +1,7 @@
 <?php
 // This file is part of Moodle - http://moodle.org/
 
-require_once('../../config.php');
+require_once '../../config.php';
 
 $enrolid = required_param('enrolid', PARAM_INT);
 $courseid = required_param('id', PARAM_INT);
