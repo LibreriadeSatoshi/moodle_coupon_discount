@@ -1,7 +1,7 @@
 <?php
 // This file is part of Moodle - http://moodle.org/
 
-$string['pluginname'] = 'Coupon Discount Payment';
+$string['pluginname'] = 'Coupon Discount';
 $string['couponcode'] = 'Coupon Code';
 $string['applycoupon'] = 'Apply Coupon';
 $string['couponapplied'] = 'Coupon applied successfully. Discount: {$a}';
@@ -49,4 +49,7 @@ $string['expirydate'] = 'Expiry date & time';
 $string['expirydate_desc'] = 'Optional. Leave blank for no expiration. The coupon becomes invalid after this exact moment.';
 $string['expiredcoupon'] = 'This coupon has expired and is no longer valid.';
 $string['neverexpires'] = 'Never';
+$string['coupondescription'] = 'Description';
+$string['coupondescription_desc'] = 'Optional. Briefly describe the purpose or context of this coupon (e.g. "Promo for March 2026 students").';
+$string['coupondescriptionplaceholder'] = 'e.g. Special discount for new students';
 

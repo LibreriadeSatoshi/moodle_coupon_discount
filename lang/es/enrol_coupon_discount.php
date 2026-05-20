@@ -1,7 +1,7 @@
 <?php
 // This file is part of Moodle - http://moodle.org/
 
-$string['pluginname'] = 'Pago con Descuento de Cupón';
+$string['pluginname'] = 'Cupón de Descuento';
 $string['pluginname_desc'] = 'Permite la matriculación a cursos con descuentos basados en porcentajes mediante cupones.';
 $string['couponcode'] = 'Código de Cupón';
 $string['applycoupon'] = 'Aplicar Cupón';
@@ -49,3 +49,6 @@ $string['expirydate'] = 'Fecha y hora de expiración';
 $string['expirydate_desc'] = 'Opcional. Deja en blanco para que el cupón no expire. El cupón se invalida exactamente en el momento indicado.';
 $string['expiredcoupon'] = 'Este cupón ha expirado y ya no es válido.';
 $string['neverexpires'] = 'Nunca';
+$string['coupondescription'] = 'Descripción';
+$string['coupondescription_desc'] = 'Opcional. Describe brevemente el propósito o contexto de este cupón (ej. "Promo para estudiantes de marzo 2026").';
+$string['coupondescriptionplaceholder'] = 'ej. Descuento especial para nuevos estudiantes';

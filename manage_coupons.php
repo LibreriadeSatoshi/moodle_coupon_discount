@@ -29,6 +29,7 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $discount    = required_param('discount_percent', PARAM_FLOAT);
     $rawemails   = optional_param('allowed_emails', '', PARAM_TEXT);
     $rawexpiry   = optional_param('expirydate', '', PARAM_TEXT);
+    $description = optional_param('description', '', PARAM_TEXT);
 
     // Sanitize emails: remove spaces, convert to lowercase.
     $emails_array = [];
@@ -62,6 +63,7 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $record->discount_percent = $discount;
         $record->allowed_emails   = $clean_emails;
         $record->expirydate       = $expiryts;
+        $record->description      = trim($description);
         $record->timecreated      = time();
         $DB->insert_record('enrol_coupon_discount_codes', $record);
         redirect($PAGE->url, get_string('couponadded', 'enrol_coupon_discount'), null, \core\output\notification::NOTIFY_SUCCESS);
@@ -70,7 +72,6 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Render page.
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('managecoupons', 'enrol_coupon_discount'));
 
 // --- Add coupon form ---
 echo html_writer::start_tag('form', ['method' => 'post', 'action' => $PAGE->url . '?action=add']);
@@ -136,6 +137,18 @@ echo html_writer::empty_tag('input', [
 ]);
 echo html_writer::end_div();
 
+echo html_writer::start_div('form-group mb-3');
+echo html_writer::tag('label', get_string('coupondescription', 'enrol_coupon_discount'), ['for' => 'description']);
+echo html_writer::tag('div', get_string('coupondescription_desc', 'enrol_coupon_discount'), ['class' => 'text-muted small mb-1']);
+echo html_writer::tag('textarea', '', [
+    'name'        => 'description',
+    'id'          => 'description',
+    'class'       => 'form-control',
+    'rows'        => '2',
+    'placeholder' => get_string('coupondescriptionplaceholder', 'enrol_coupon_discount'),
+]);
+echo html_writer::end_div();
+
 echo html_writer::empty_tag('input', ['type' => 'submit', 'value' => get_string('addcoupon', 'enrol_coupon_discount'), 'class' => 'btn btn-primary']);
 echo html_writer::end_div();
 echo html_writer::end_tag('form');
@@ -148,6 +161,7 @@ if ($coupons) {
     $table->head      = [
         get_string('couponcode', 'enrol_coupon_discount'),
         get_string('discount_percent', 'enrol_coupon_discount'),
+        get_string('coupondescription', 'enrol_coupon_discount'),
         get_string('allowed_emails', 'enrol_coupon_discount'),
         get_string('expirydate', 'enrol_coupon_discount'),
         get_string('timecreated', 'enrol_coupon_discount'),
@@ -170,9 +184,14 @@ if ($coupons) {
             ? userdate($coupon->expirydate, get_string('strftimedatetimeshort', 'langconfig'))
             : html_writer::tag('span', get_string('neverexpires', 'enrol_coupon_discount'), ['class' => 'badge badge-secondary bg-secondary']);
 
+        $desc_display = !empty($coupon->description)
+            ? s($coupon->description)
+            : html_writer::tag('span', '—', ['class' => 'text-muted']);
+
         $table->data[] = [
             html_writer::tag('strong', $coupon->code),
             $coupon->discount_percent . '%',
+            $desc_display,
             $allowed_display,
             $expiry_display,
             userdate($coupon->timecreated),
