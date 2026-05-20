@@ -5,6 +5,9 @@ require_once '../../config.php';
 
 global $DB, $SESSION, $USER;
 
+define('COUPON_PLUGIN', 'enrol_coupon_discount');
+define('COUPON_USAGE_TABLE', 'enrol_coupon_discount_usage');
+
 $courseid   = required_param('id', PARAM_INT);
 $instanceid = required_param('instanceid', PARAM_INT);
 $couponcode = optional_param('coupon', '', PARAM_TEXT);
@@ -21,7 +24,7 @@ $returnurl = new moodle_url('/enrol/index.php', ['id' => $courseid]);
 if (empty($couponcode)) {
     unset($SESSION->coupon_discount[$instanceid]);
     // Also remove any pending DB usage record for this user/instance.
-    $DB->delete_records('enrol_coupon_discount_usage', [
+    $DB->delete_records(COUPON_USAGE_TABLE, [
         'instanceid' => $instanceid,
         'userid'     => $USER->id,
     ]);
@@ -33,13 +36,13 @@ $coupon = $DB->get_record('enrol_coupon_discount_codes', ['code' => $couponcode]
 
 if (!$coupon) {
     unset($SESSION->coupon_discount[$instanceid]);
-    redirect($returnurl, get_string('invalidcoupon', 'enrol_coupon_discount'), null, \core\output\notification::NOTIFY_ERROR);
+    redirect($returnurl, get_string('invalidcoupon', COUPON_PLUGIN), null, \core\output\notification::NOTIFY_ERROR);
 }
 
 // Check if coupon has expired.
 if (!empty($coupon->expirydate) && $coupon->expirydate > 0 && time() > $coupon->expirydate) {
     unset($SESSION->coupon_discount[$instanceid]);
-    redirect($returnurl, get_string('expiredcoupon', 'enrol_coupon_discount'), null, \core\output\notification::NOTIFY_ERROR);
+    redirect($returnurl, get_string('expiredcoupon', COUPON_PLUGIN), null, \core\output\notification::NOTIFY_ERROR);
 }
 
 // Check if coupon is restricted to specific users.
@@ -48,7 +51,7 @@ if (!empty($coupon->allowed_emails)) {
     $useremail = strtolower(trim($USER->email));
     if (!in_array($useremail, $allowed, true)) {
         unset($SESSION->coupon_discount[$instanceid]);
-        redirect($returnurl, get_string('notallowedcoupon', 'enrol_coupon_discount'), null, \core\output\notification::NOTIFY_ERROR);
+        redirect($returnurl, get_string('notallowedcoupon', COUPON_PLUGIN), null, \core\output\notification::NOTIFY_ERROR);
     }
 }
 
@@ -63,7 +66,7 @@ $SESSION->coupon_discount[$instanceid] = [
 
 // Persist the applied coupon to DB so it survives gateway redirects.
 // Delete any previous record for this user/instance first (idempotent).
-$DB->delete_records('enrol_coupon_discount_usage', [
+$DB->delete_records(COUPON_USAGE_TABLE, [
     'instanceid' => $instanceid,
     'userid'     => $USER->id,
 ]);

@@ -3,6 +3,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+define('PLUGIN_COMPONENT', 'enrol_coupon_discount');
+
 class enrol_coupon_discount_plugin extends enrol_plugin { // NOSONAR Moodle enrol plugin naming convention.
 
     public function get_name() {
@@ -49,7 +51,7 @@ class enrol_coupon_discount_plugin extends enrol_plugin { // NOSONAR Moodle enro
 
         if (has_capability('enrol/coupon_discount:manage', $context)) {
             $enrolusersurl = new moodle_url('/enrol/coupon_discount/manage.php', ['enrolid' => $instance->id, 'id' => $instance->courseid]);
-            $icons[] = $OUTPUT->action_icon($enrolusersurl, new pix_icon('t/enrolusers', get_string('addusers', 'enrol_coupon_discount')));
+            $icons[] = $OUTPUT->action_icon($enrolusersurl, new pix_icon('t/enrolusers', get_string('addusers', PLUGIN_COMPONENT)));
         }
 
         return $icons;
@@ -98,7 +100,7 @@ class enrol_coupon_discount_plugin extends enrol_plugin { // NOSONAR Moodle enro
 
         $cost = (float) $instance->cost;
         if (abs($cost) < 0.01) {
-            echo '<p>'.get_string('nocost', 'enrol_coupon_discount').'</p>';
+            echo '<p>'.get_string('nocost', PLUGIN_COMPONENT).'</p>';
             return $OUTPUT->box(ob_get_clean());
         }
 
@@ -116,13 +118,13 @@ class enrol_coupon_discount_plugin extends enrol_plugin { // NOSONAR Moodle enro
         $discounted_cost_str = \core_payment\helper::get_cost_as_string($cost, $instance->currency);
 
         echo '<div class="enrol_coupon_discount_container">';
-        echo '<h3>' . get_string('coursepricing', 'enrol_coupon_discount') . ': ' . format_string($course->fullname, true, ['context' => $context]) . '</h3>';
+        echo '<h3>' . get_string('coursepricing', PLUGIN_COMPONENT) . ': ' . format_string($course->fullname, true, ['context' => $context]) . '</h3>';
 
         echo '<div class="enrol_coupon_discount_price_box">';
         if ($discount_percent > 0) {
             echo '<span class="original_price">' . $cost_str . '</span>';
             echo '<span class="discounted_price animate_price">' . $discounted_cost_str . '</span>';
-            echo '<div class="enrol_coupon_discount_success_msg"><i class="fa fa-check-circle"></i> ' . get_string('couponapplied', 'enrol_coupon_discount', $discount_percent.'%') . '</div>';
+            echo '<div class="enrol_coupon_discount_success_msg"><i class="fa fa-check-circle"></i> ' . get_string('couponapplied', PLUGIN_COMPONENT, $discount_percent.'%') . '</div>';
         } else {
             echo '<span class="discounted_price">' . $cost_str . '</span>';
         }
@@ -135,19 +137,19 @@ echo '<input type="hidden" name="sesskey" value="'.sesskey().'">';
         echo '<input type="hidden" name="instanceid" value="'.$instance->id.'">';
 
         echo '<div class="enrol_coupon_discount_input_group">';
-        echo '<input type="text" name="coupon" placeholder="'.get_string('couponcode', 'enrol_coupon_discount').'" value="'.s($couponcode).'" autocomplete="off">';
+        echo '<input type="text" name="coupon" placeholder="'.get_string('couponcode', PLUGIN_COMPONENT).'" value="'.s($couponcode).'" autocomplete="off">';
         echo '</div>';
 
-        echo '<button type="submit" class="enrol_coupon_discount_btn_apply">'.get_string('applycoupon', 'enrol_coupon_discount').'</button>';
+        echo '<button type="submit" class="enrol_coupon_discount_btn_apply">'.get_string('applycoupon', PLUGIN_COMPONENT).'</button>';
         echo '</form>';
 
         // Payment button
         $successurl = \enrol_coupon_discount\payment\service_provider::get_success_url('coupon_discount', $instance->id)->out(false);
-        $description = get_string('pluginname', 'enrol_coupon_discount') . ' - ' . format_string($course->fullname, true, ['context' => $context]);
+        $description = get_string('pluginname', PLUGIN_COMPONENT) . ' - ' . format_string($course->fullname, true, ['context' => $context]);
 
         echo '<div class="enrol_coupon_discount_payment_region">';
         if (isguestuser() || !isloggedin()) {
-            echo '<div class="mdl-align"><p>' . get_string('mustloginpay', 'enrol_coupon_discount') . '</p></div>';
+            echo '<div class="mdl-align"><p>' . get_string('mustloginpay', PLUGIN_COMPONENT) . '</p></div>';
         } else {
             echo '<button class="enrol_coupon_discount_btn_pay" type="button" id="gateways-modal-trigger-btc" ' .
                  'data-action="core_payment/triggerPayment" ' .
@@ -157,7 +159,7 @@ echo '<input type="hidden" name="sesskey" value="'.sesskey().'">';
                  'data-cost="'.$discounted_cost_str.'" ' .
                  'data-successurl="'.$successurl.'" ' .
                  'data-description="'.$description.'">' .
-                 '<i class="fa fa-credit-card"></i> ' . get_string('sendpaymentbutton', 'enrol_coupon_discount') . '</button>';
+                 '<i class="fa fa-credit-card"></i> ' . get_string('sendpaymentbutton', PLUGIN_COMPONENT) . '</button>';
         }
         echo '</div>';
 
@@ -174,7 +176,7 @@ echo '<input type="hidden" name="sesskey" value="'.sesskey().'">';
         $mform->setType('name', PARAM_TEXT);
 
         $options = array(ENROL_INSTANCE_ENABLED  => get_string('yes'), ENROL_INSTANCE_DISABLED => get_string('no'));
-        $mform->addElement('select', 'status', get_string('status', 'enrol_coupon_discount'), $options);
+        $mform->addElement('select', 'status', get_string('status', PLUGIN_COMPONENT), $options);
         $mform->setDefault('status', ENROL_INSTANCE_ENABLED);
 
         $accounts = \core_payment\helper::get_payment_accounts_menu($context);
@@ -185,24 +187,24 @@ echo '<input type="hidden" name="sesskey" value="'.sesskey().'">';
             $mform->setType('customint1', PARAM_INT);
         }
 
-        $mform->addElement('text', 'cost', get_string('cost', 'enrol_coupon_discount'), array('size' => 4));
+        $mform->addElement('text', 'cost', get_string('cost', PLUGIN_COMPONENT), array('size' => 4));
         $mform->setType('cost', PARAM_RAW);
         $mform->setDefault('cost', 0);
 
         $supportedcurrencies = $this->get_possible_currencies();
-        $mform->addElement('select', 'currency', get_string('currency', 'enrol_coupon_discount'), $supportedcurrencies);
+        $mform->addElement('select', 'currency', get_string('currency', PLUGIN_COMPONENT), $supportedcurrencies);
 
         $roles = get_default_enrol_roles($context);
-        $mform->addElement('select', 'roleid', get_string('assignrole', 'enrol_coupon_discount'), $roles);
+        $mform->addElement('select', 'roleid', get_string('assignrole', PLUGIN_COMPONENT), $roles);
 
         $options = array('optional' => true, 'defaultunit' => 86400);
-        $mform->addElement('duration', 'enrolperiod', get_string('enrolperiod', 'enrol_coupon_discount'), $options);
+        $mform->addElement('duration', 'enrolperiod', get_string('enrolperiod', PLUGIN_COMPONENT), $options);
 
         $options = array('optional' => true);
-        $mform->addElement('date_time_selector', 'enrolstartdate', get_string('enrolstartdate', 'enrol_coupon_discount'), $options);
+        $mform->addElement('date_time_selector', 'enrolstartdate', get_string('enrolstartdate', PLUGIN_COMPONENT), $options);
 
         $options = array('optional' => true);
-        $mform->addElement('date_time_selector', 'enrolenddate', get_string('enrolenddate', 'enrol_coupon_discount'), $options);
+        $mform->addElement('date_time_selector', 'enrolenddate', get_string('enrolenddate', PLUGIN_COMPONENT), $options);
     }
 
     public function edit_instance_validation($data, $files, $instance, $context) {
