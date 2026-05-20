@@ -49,7 +49,7 @@ class enrol_coupon_discount_plugin extends enrol_plugin { // NOSONAR Moodle enro
 
         if (has_capability('enrol/coupon_discount:manage', $context)) {
             $enrolusersurl = new moodle_url('/enrol/coupon_discount/manage.php', ['enrolid' => $instance->id, 'id' => $instance->courseid]);
-            $icons[] = $OUTPUT->action_icon($enrolusersurl, new pix_icon('t/enrolusers', get_string('enrolusers', 'enrol_coupon_discount')));
+            $icons[] = $OUTPUT->action_icon($enrolusersurl, new pix_icon('t/enrolusers', get_string('addusers', 'enrol_coupon_discount')));
         }
 
         return $icons;
@@ -116,7 +116,7 @@ class enrol_coupon_discount_plugin extends enrol_plugin { // NOSONAR Moodle enro
         $discounted_cost_str = \core_payment\helper::get_cost_as_string($cost, $instance->currency);
 
         echo '<div class="enrol_coupon_discount_container">';
-        echo '<h3>' . get_string('enrolincourse', 'enrol_coupon_discount') . ': ' . format_string($course->fullname, true, ['context' => $context]) . '</h3>';
+        echo '<h3>' . get_string('coursepricing', 'enrol_coupon_discount') . ': ' . format_string($course->fullname, true, ['context' => $context]) . '</h3>';
 
         echo '<div class="enrol_coupon_discount_price_box">';
         if ($discount_percent > 0) {
@@ -147,7 +147,7 @@ echo '<input type="hidden" name="sesskey" value="'.sesskey().'">';
 
         echo '<div class="enrol_coupon_discount_payment_region">';
         if (isguestuser() || !isloggedin()) {
-            echo '<div class="mdl-align"><p>You must log in to pay</p></div>';
+            echo '<div class="mdl-align"><p>' . get_string('mustloginpay', 'enrol_coupon_discount') . '</p></div>';
         } else {
             echo '<button class="enrol_coupon_discount_btn_pay" type="button" id="gateways-modal-trigger-btc" ' .
                  'data-action="core_payment/triggerPayment" ' .

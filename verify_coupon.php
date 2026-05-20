@@ -36,6 +36,12 @@ if (!$coupon) {
     redirect($returnurl, get_string('invalidcoupon', 'enrol_coupon_discount'), null, \core\output\notification::NOTIFY_ERROR);
 }
 
+// Check if coupon has expired.
+if (!empty($coupon->expirydate) && $coupon->expirydate > 0 && time() > $coupon->expirydate) {
+    unset($SESSION->coupon_discount[$instanceid]);
+    redirect($returnurl, get_string('expiredcoupon', 'enrol_coupon_discount'), null, \core\output\notification::NOTIFY_ERROR);
+}
+
 // Check if coupon is restricted to specific users.
 if (!empty($coupon->allowed_emails)) {
     $allowed = explode(',', $coupon->allowed_emails);

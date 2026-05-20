@@ -17,5 +17,16 @@ function xmldb_enrol_coupon_discount_upgrade($oldversion) { // NOSONAR Moodle up
         upgrade_plugin_savepoint(true, 2026051800, 'enrol', 'coupon_discount');
     }
 
+    if ($oldversion < 2026052001) {
+        $table = new xmldb_table('enrol_coupon_discount_codes');
+        $field = new xmldb_field('expirydate', XMLDB_TYPE_INTEGER, '10', null, null, null, '0', 'allowed_emails');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2026052001, 'enrol', 'coupon_discount');
+    }
+
     return true;
 }

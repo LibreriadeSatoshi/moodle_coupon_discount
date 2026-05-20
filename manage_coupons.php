@@ -25,9 +25,10 @@ if ($action === 'delete' && $id) {
 // Handle add form submission.
 if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     require_sesskey();
-    $code     = required_param('code', PARAM_ALPHANUMEXT);
-    $discount = required_param('discount_percent', PARAM_FLOAT);
-    $rawemails = optional_param('allowed_emails', '', PARAM_TEXT);
+    $code        = required_param('code', PARAM_ALPHANUMEXT);
+    $discount    = required_param('discount_percent', PARAM_FLOAT);
+    $rawemails   = optional_param('allowed_emails', '', PARAM_TEXT);
+    $rawexpiry   = optional_param('expirydate', '', PARAM_TEXT);
 
     // Sanitize emails: remove spaces, convert to lowercase.
     $emails_array = [];
@@ -42,6 +43,15 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $clean_emails = implode(',', $emails_array);
 
+    // Convert datetime-local string (YYYY-MM-DDTHH:MM) to Unix timestamp. 0 = no expiry.
+    $expiryts = 0;
+    if (!empty($rawexpiry)) {
+        $parsed = strtotime($rawexpiry);
+        if ($parsed !== false && $parsed > 0) {
+            $expiryts = $parsed;
+        }
+    }
+
     if ($discount < 1 || $discount > 100) {
         $error = get_string('invaliddiscount', 'enrol_coupon_discount');
     } elseif ($DB->record_exists('enrol_coupon_discount_codes', ['code' => $code])) {
@@ -51,6 +61,7 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $record->code             = strtoupper(trim($code));
         $record->discount_percent = $discount;
         $record->allowed_emails   = $clean_emails;
+        $record->expirydate       = $expiryts;
         $record->timecreated      = time();
         $DB->insert_record('enrol_coupon_discount_codes', $record);
         redirect($PAGE->url, get_string('couponadded', 'enrol_coupon_discount'), null, \core\output\notification::NOTIFY_SUCCESS);
@@ -79,7 +90,7 @@ echo html_writer::empty_tag('input', [
     'name'        => 'code',
     'id'          => 'code',
     'class'       => 'form-control',
-    'placeholder' => 'e.g. BITCOIN20',
+    'placeholder' => get_string('couponcodeplacholder', 'enrol_coupon_discount'),
     'required'    => 'required',
     'style'       => 'text-transform:uppercase',
 ]);
@@ -109,7 +120,19 @@ echo html_writer::tag('textarea', '', [
     'id'          => 'allowed_emails',
     'class'       => 'form-control',
     'rows'        => '2',
-    'placeholder' => 'ejemplo@correo.com, otro@correo.com',
+    'placeholder' => get_string('allowedemailsplaceholder', 'enrol_coupon_discount'),
+]);
+echo html_writer::end_div();
+
+echo html_writer::start_div('form-group mb-3');
+echo html_writer::tag('label', get_string('expirydate', 'enrol_coupon_discount'), ['for' => 'expirydate']);
+echo html_writer::tag('div', get_string('expirydate_desc', 'enrol_coupon_discount'), ['class' => 'text-muted small mb-1']);
+echo html_writer::empty_tag('input', [
+    'type'  => 'datetime-local',
+    'name'  => 'expirydate',
+    'id'    => 'expirydate',
+    'class' => 'form-control',
+    'style' => 'width:220px',
 ]);
 echo html_writer::end_div();
 
@@ -126,6 +149,7 @@ if ($coupons) {
         get_string('couponcode', 'enrol_coupon_discount'),
         get_string('discount_percent', 'enrol_coupon_discount'),
         get_string('allowed_emails', 'enrol_coupon_discount'),
+        get_string('expirydate', 'enrol_coupon_discount'),
         get_string('timecreated', 'enrol_coupon_discount'),
         get_string('actions', 'enrol_coupon_discount'),
     ];
@@ -138,11 +162,19 @@ if ($coupons) {
             get_string('delete'),
             ['class' => 'btn btn-sm btn-danger', 'onclick' => 'return confirm("' . get_string('confirmdeletecoupon', 'enrol_coupon_discount') . '")']
         );
-        $allowed_display = empty($coupon->allowed_emails) ? html_writer::tag('span', 'Todos', ['class' => 'badge badge-success bg-success']) : s($coupon->allowed_emails);
+        $allowed_display = empty($coupon->allowed_emails)
+            ? html_writer::tag('span', get_string('allusers', 'enrol_coupon_discount'), ['class' => 'badge badge-success bg-success'])
+            : s($coupon->allowed_emails);
+
+        $expiry_display = (!empty($coupon->expirydate) && $coupon->expirydate > 0)
+            ? userdate($coupon->expirydate, get_string('strftimedatetimeshort', 'langconfig'))
+            : html_writer::tag('span', get_string('neverexpires', 'enrol_coupon_discount'), ['class' => 'badge badge-secondary bg-secondary']);
+
         $table->data[] = [
             html_writer::tag('strong', $coupon->code),
             $coupon->discount_percent . '%',
             $allowed_display,
+            $expiry_display,
             userdate($coupon->timecreated),
             $deletelink,
         ];
