@@ -7,9 +7,20 @@ define('PLUGIN_COMPONENT', 'enrol_coupon_discount');
 
 class enrol_coupon_discount_plugin extends enrol_plugin { // NOSONAR Moodle enrol plugin naming convention.
 
+    /**
+     * Returns the localised name of the plugin.
+     *
+     * @return string
+     */
     public function get_name() {
         return 'coupon_discount';
     }
+
+    /**
+     * Returns the list of possible currencies for payment.
+     *
+     * @return array
+     */
     public function get_possible_currencies(): array {
         $codes = \core_payment\helper::get_supported_currencies();
         $currencies = [];
@@ -22,27 +33,62 @@ class enrol_coupon_discount_plugin extends enrol_plugin { // NOSONAR Moodle enro
         return $currencies;
     }
 
+    /**
+     * Returns whether the role is protected from changes.
+     *
+     * @return bool
+     */
     public function roles_protected() {
         return true;
     }
 
+    /**
+     * Returns whether unenrolment is allowed for this instance.
+     *
+     * @param stdClass $instance
+     * @return bool
+     */
     public function allow_unenrol(stdClass $instance) {
         return true;
     }
 
+    /**
+     * Returns whether managing this instance is allowed.
+     *
+     * @param stdClass $instance
+     * @return bool
+     */
     public function allow_manage(stdClass $instance) {
         return true;
     }
 
+    /**
+     * Returns whether the enrolment link should be shown.
+     *
+     * @param stdClass $instance
+     * @return bool
+     */
     public function show_enrolme_link(stdClass $instance) {
         return $instance->status == ENROL_INSTANCE_ENABLED;
     }
 
+    /**
+     * Returns whether the instance can be deleted.
+     *
+     * @param stdClass $instance
+     * @return bool
+     */
     public function can_delete_instance($instance) {
         $context = context_course::instance($instance->courseid);
         return has_capability('enrol/coupon_discount:config', $context);
     }
 
+    /**
+     * Returns the action icons for this instance.
+     *
+     * @param stdClass $instance
+     * @return array
+     */
     public function get_action_icons(stdClass $instance) {
         global $OUTPUT;
 
@@ -57,6 +103,12 @@ class enrol_coupon_discount_plugin extends enrol_plugin { // NOSONAR Moodle enro
         return $icons;
     }
 
+    /**
+     * Returns whether adding an instance is allowed.
+     *
+     * @param int $courseid
+     * @return bool
+     */
     public function can_add_instance($courseid) {
         $context = context_course::instance($courseid, MUST_EXIST);
         if (!has_capability('moodle/course:enrolconfig', $context)) {
@@ -65,10 +117,22 @@ class enrol_coupon_discount_plugin extends enrol_plugin { // NOSONAR Moodle enro
         return true;
     }
 
+    /**
+     * Returns whether the standard editing UI should be used.
+     *
+     * @return bool
+     */
     public function use_standard_editing_ui() {
         return true;
     }
 
+    /**
+     * Adds a new instance of the enrolment plugin.
+     *
+     * @param stdClass $course
+     * @param array|null $fields
+     * @return int
+     */
     public function add_instance($course, ?array $fields = null) {
         if ($fields && !empty($fields['cost'])) {
             $fields['cost'] = unformat_float($fields['cost']);
@@ -76,6 +140,13 @@ class enrol_coupon_discount_plugin extends enrol_plugin { // NOSONAR Moodle enro
         return parent::add_instance($course, $fields);
     }
 
+    /**
+     * Updates an existing instance of the enrolment plugin.
+     *
+     * @param stdClass $instance
+     * @param stdClass|null $data
+     * @return bool
+     */
     public function update_instance($instance, $data) {
         if ($data) {
             $data->cost = unformat_float($data->cost);
@@ -83,6 +154,12 @@ class enrol_coupon_discount_plugin extends enrol_plugin { // NOSONAR Moodle enro
         return parent::update_instance($instance, $data);
     }
 
+    /**
+     * Renders the enrolment page hook with coupon input and payment button.
+     *
+     * @param stdClass $instance
+     * @return string
+     */
     public function enrol_page_hook(stdClass $instance) {
         global $USER, $OUTPUT, $DB, $CFG, $SESSION;
 
@@ -171,6 +248,13 @@ echo '<input type="hidden" name="sesskey" value="'.sesskey().'">';
         return $OUTPUT->box(ob_get_clean());
     }
 
+    /**
+     * Adds elements to the instance edit form.
+     *
+     * @param stdClass $instance
+     * @param MoodleQuickForm $mform
+     * @param context $context
+     */
     public function edit_instance_form($instance, MoodleQuickForm $mform, $context) {
         $mform->addElement('text', 'name', get_string('custominstancename', 'enrol'));
         $mform->setType('name', PARAM_TEXT);
@@ -207,6 +291,15 @@ echo '<input type="hidden" name="sesskey" value="'.sesskey().'">';
         $mform->addElement('date_time_selector', 'enrolenddate', get_string('enrolenddate', PLUGIN_COMPONENT), $options);
     }
 
+    /**
+     * Validates the instance edit form data.
+     *
+     * @param array $data
+     * @param array $files
+     * @param stdClass $instance
+     * @param context $context
+     * @return array
+     */
     public function edit_instance_validation($data, $files, $instance, $context) {
         $errors = array();
         $cost = clean_param($data['cost'], PARAM_RAW);

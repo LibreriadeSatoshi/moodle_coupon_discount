@@ -3,6 +3,8 @@
 
 require_once '../../config.php';
 
+global $DB;
+
 define('PLUGIN_NAME', 'enrol_coupon_discount');
 define('COUPON_TABLE', 'enrol_coupon_discount_codes');
 define('CSS_FORM_GROUP', 'form-group mb-3');

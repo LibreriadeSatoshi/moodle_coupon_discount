@@ -3,6 +3,8 @@
 
 require_once '../../config.php';
 
+global $DB;
+
 define('MANAGE_PLUGIN', 'enrol_coupon_discount');
 
 $enrolid = required_param('enrolid', PARAM_INT);

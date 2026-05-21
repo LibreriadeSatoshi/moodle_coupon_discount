@@ -34,6 +34,7 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="instanceid_userid" UNIQUE="false" FIELDS="instanceid, userid"/>
+        <INDEX NAME="couponid" UNIQUE="false" FIELDS="couponid"/>
       </INDEXES>
     </TABLE>
   </TABLES>

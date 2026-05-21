@@ -50,5 +50,16 @@ function xmldb_enrol_coupon_discount_upgrade($oldversion) { // NOSONAR Moodle up
         upgrade_plugin_savepoint(true, 2026052100, 'enrol', 'coupon_discount');
     }
 
+    if ($oldversion < 2026052101) {
+        $table = new xmldb_table('enrol_coupon_discount_usage');
+        $index = new xmldb_index('couponid', XMLDB_INDEX_NOTUNIQUE, ['couponid']);
+
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        upgrade_plugin_savepoint(true, 2026052101, 'enrol', 'coupon_discount');
+    }
+
     return true;
 }

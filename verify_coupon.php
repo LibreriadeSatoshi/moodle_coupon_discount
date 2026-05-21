@@ -18,7 +18,8 @@ $instance = $DB->get_record('enrol', ['id' => $instanceid, 'enrol' => 'coupon_di
 require_login();
 require_sesskey();
 
-$returnurl = new moodle_url('/enrol/index.php', ['id' => $courseid]);
+$referer = get_local_referer(false);
+$returnurl = $referer ?: new moodle_url('/enrol/index.php', ['id' => $courseid]);
 
 if (empty($couponcode)) {
     unset($SESSION->coupon_discount[$instanceid]);
@@ -58,19 +59,25 @@ if ($coupon->max_uses > 0) {
     }
 }
 
-$alreadyused = $DB->record_exists(COUPON_USAGE_TABLE, [
-    'instanceid' => $instanceid,
-    'userid'     => $USER->id,
-    'couponid'   => $coupon->id,
-]);
-if ($alreadyused) {
-    unset($SESSION->coupon_discount[$instanceid]);
-    redirect($returnurl, get_string('couponalreadyused', COUPON_PLUGIN), null, \core\output\notification::NOTIFY_ERROR);
-}
-
 $transaction = $DB->start_delegated_transaction();
 
 try {
+    $alreadyused = $DB->record_exists(COUPON_USAGE_TABLE, [
+        'instanceid' => $instanceid,
+        'userid'     => $USER->id,
+        'couponid'   => $coupon->id,
+    ]);
+    if ($alreadyused) {
+        $transaction->rollback(new moodle_exception('couponalreadyused', COUPON_PLUGIN));
+    }
+
+    if ($coupon->max_uses > 0) {
+        $totaluses = $DB->count_records(COUPON_USAGE_TABLE, ['couponid' => $coupon->id]);
+        if ($totaluses >= $coupon->max_uses) {
+            $transaction->rollback(new moodle_exception('couponmaxusesreached', COUPON_PLUGIN));
+        }
+    }
+
     if (!isset($SESSION->coupon_discount)) {
         $SESSION->coupon_discount = [];
     }
@@ -86,15 +93,26 @@ try {
 
     $usage                   = new stdClass();
     $usage->instanceid       = $instanceid;
-    $usage->userid           = $USER->id;
+    $usage->userid           => $USER->id;
     $usage->couponid         = $coupon->id;
     $usage->discount_percent = (float) $coupon->discount_percent;
     $usage->timecreated      = time();
     $DB->insert_record(COUPON_USAGE_TABLE, $usage);
 
+    $event = \enrol_coupon_discount\event\coupon_applied::create([
+        'context'  => context_course::instance($course->id),
+        'relateduserid' => $USER->id,
+        'other'    => [
+            'couponid'         => $coupon->id,
+            'couponcode'       => $coupon->code,
+            'discount_percent' => (float) $coupon->discount_percent,
+            'instanceid'       => $instanceid,
+        ],
+    ]);
+    $event->trigger();
+
     $transaction->allow_commit();
 } catch (Exception $e) {
     $transaction->rollback($e);
 }
-
 redirect($returnurl);
