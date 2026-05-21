@@ -96,7 +96,7 @@
     padding: 14px 24px;
     font-weight: 700;
     cursor: pointer;
-    margin-top: 10px;
+    margin: 10px auto 0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -122,7 +122,8 @@
 .enrol_coupon_discount_payment_region {
     margin-top: 24px;
     padding-top: 16px;
-    border-top: 1px solid var(--border-color, #dee2e6);
+    display: flex;
+    justify-content: center;
 }
 
 @keyframes pricePop {
