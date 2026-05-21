@@ -20,10 +20,8 @@ require_sesskey();
 
 $returnurl = new moodle_url('/enrol/index.php', ['id' => $courseid]);
 
-// If coupon field is empty, clear any applied coupon and redirect.
 if (empty($couponcode)) {
     unset($SESSION->coupon_discount[$instanceid]);
-    // Also remove any pending DB usage record for this user/instance.
     $DB->delete_records(COUPON_USAGE_TABLE, [
         'instanceid' => $instanceid,
         'userid'     => $USER->id,
@@ -31,21 +29,18 @@ if (empty($couponcode)) {
     redirect($returnurl);
 }
 
-// Look up coupon in the database.
-$coupon = $DB->get_record('enrol_coupon_discount_codes', ['code' => $couponcode]);
+$coupon = $DB->get_record('enrol_coupon_discount_codes', ['code' => strtoupper(trim($couponcode))]);
 
 if (!$coupon) {
     unset($SESSION->coupon_discount[$instanceid]);
     redirect($returnurl, get_string('invalidcoupon', COUPON_PLUGIN), null, \core\output\notification::NOTIFY_ERROR);
 }
 
-// Check if coupon has expired.
 if (!empty($coupon->expirydate) && $coupon->expirydate > 0 && time() > $coupon->expirydate) {
     unset($SESSION->coupon_discount[$instanceid]);
     redirect($returnurl, get_string('expiredcoupon', COUPON_PLUGIN), null, \core\output\notification::NOTIFY_ERROR);
 }
 
-// Check if coupon is restricted to specific users.
 if (!empty($coupon->allowed_emails)) {
     $allowed = explode(',', $coupon->allowed_emails);
     $useremail = strtolower(trim($USER->email));
@@ -55,28 +50,51 @@ if (!empty($coupon->allowed_emails)) {
     }
 }
 
-// Valid coupon — store in session.
-if (!isset($SESSION->coupon_discount)) {
-    $SESSION->coupon_discount = [];
+if ($coupon->max_uses > 0) {
+    $totaluses = $DB->count_records(COUPON_USAGE_TABLE, ['couponid' => $coupon->id]);
+    if ($totaluses >= $coupon->max_uses) {
+        unset($SESSION->coupon_discount[$instanceid]);
+        redirect($returnurl, get_string('couponmaxusesreached', COUPON_PLUGIN), null, \core\output\notification::NOTIFY_ERROR);
+    }
 }
-$SESSION->coupon_discount[$instanceid] = [
-    'code'             => $coupon->code,
-    'discount_percent' => (float) $coupon->discount_percent,
-];
 
-// Persist the applied coupon to DB so it survives gateway redirects.
-// Delete any previous record for this user/instance first (idempotent).
-$DB->delete_records(COUPON_USAGE_TABLE, [
+$alreadyused = $DB->record_exists(COUPON_USAGE_TABLE, [
     'instanceid' => $instanceid,
     'userid'     => $USER->id,
+    'couponid'   => $coupon->id,
 ]);
+if ($alreadyused) {
+    unset($SESSION->coupon_discount[$instanceid]);
+    redirect($returnurl, get_string('couponalreadyused', COUPON_PLUGIN), null, \core\output\notification::NOTIFY_ERROR);
+}
 
-$usage                   = new stdClass();
-$usage->instanceid       = $instanceid;
-$usage->userid           = $USER->id;
-$usage->couponid         = $coupon->id;
-$usage->discount_percent = (float) $coupon->discount_percent;
-$usage->timecreated      = time();
-$DB->insert_record('enrol_coupon_discount_usage', $usage);
+$transaction = $DB->start_delegated_transaction();
+
+try {
+    if (!isset($SESSION->coupon_discount)) {
+        $SESSION->coupon_discount = [];
+    }
+    $SESSION->coupon_discount[$instanceid] = [
+        'code'             => $coupon->code,
+        'discount_percent' => (float) $coupon->discount_percent,
+    ];
+
+    $DB->delete_records(COUPON_USAGE_TABLE, [
+        'instanceid' => $instanceid,
+        'userid'     => $USER->id,
+    ]);
+
+    $usage                   = new stdClass();
+    $usage->instanceid       = $instanceid;
+    $usage->userid           = $USER->id;
+    $usage->couponid         = $coupon->id;
+    $usage->discount_percent = (float) $coupon->discount_percent;
+    $usage->timecreated      = time();
+    $DB->insert_record(COUPON_USAGE_TABLE, $usage);
+
+    $transaction->allow_commit();
+} catch (Exception $e) {
+    $transaction->rollback($e);
+}
 
 redirect($returnurl);

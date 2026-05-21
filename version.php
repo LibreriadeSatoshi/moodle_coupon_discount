@@ -3,6 +3,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2026052002;
+$plugin->version   = 2026052100;
 $plugin->requires  = 2022041900;
 $plugin->component = 'enrol_coupon_discount';

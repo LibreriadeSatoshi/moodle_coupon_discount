@@ -21,12 +21,12 @@ $PAGE->set_title(get_string('directaccess', MANAGE_PLUGIN));
 $PAGE->set_heading(get_string('directaccess', MANAGE_PLUGIN));
 $PAGE->set_pagelayout('admin');
 
-$action = optional_param('action', '', PARAM_ALPHA);
+$doenrol = optional_param('doenrol', '', PARAM_ALPHA);
 $emails = optional_param('emails', '', PARAM_TEXT);
 
 $plugin = enrol_get_plugin('coupon_discount');
 
-if ($action === 'enrol' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($doenrol === 'yes' && confirm_sesskey()) {
     require_sesskey();
     
     $parts = explode(',', $emails);
@@ -61,7 +61,7 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('directaccess', MANAGE_PLUGIN));
 
 echo html_writer::start_div('card p-4 mb-4');
-echo html_writer::start_tag('form', ['method' => 'post', 'action' => $PAGE->url . '&action=enrol']);
+echo html_writer::start_tag('form', ['method' => 'post', 'action' => $PAGE->url . '&doenrol=yes']);
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
 
 echo html_writer::start_div('form-group mb-3');

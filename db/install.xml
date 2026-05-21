@@ -12,6 +12,7 @@
         <FIELD NAME="allowed_emails" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Comma-separated list of allowed user emails. Empty means all users."/>
         <FIELD NAME="expirydate" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Unix timestamp of expiry moment. 0 means no expiration."/>
         <FIELD NAME="description" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Optional description of the coupon purpose."/>
+        <FIELD NAME="max_uses" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Maximum number of times this coupon can be used. 0 means unlimited."/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>

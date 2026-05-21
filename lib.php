@@ -23,7 +23,7 @@ class enrol_coupon_discount_plugin extends enrol_plugin { // NOSONAR Moodle enro
     }
 
     public function roles_protected() {
-        return false;
+        return true;
     }
 
     public function allow_unenrol(stdClass $instance) {
@@ -209,9 +209,10 @@ echo '<input type="hidden" name="sesskey" value="'.sesskey().'">';
 
     public function edit_instance_validation($data, $files, $instance, $context) {
         $errors = array();
-        $cost = str_replace(get_string('decsep', 'langconfig'), '.', $data['cost']);
-        if (!is_numeric($cost)) {
-            $errors['cost'] = 'Invalid cost';
+        $cost = clean_param($data['cost'], PARAM_RAW);
+        $numericcost = unformat_float($cost);
+        if ($numericcost === null || $numericcost < 0) {
+            $errors['cost'] = get_string('invalidcost', PLUGIN_COMPONENT);
         }
         return $errors;
     }
