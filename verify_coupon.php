@@ -24,8 +24,9 @@ $returnurl = $referer ?: new moodle_url('/enrol/index.php', ['id' => $courseid])
 if (empty($couponcode)) {
     unset($SESSION->coupon_discount[$instanceid]);
     $DB->delete_records(COUPON_USAGE_TABLE, [
-        'instanceid' => $instanceid,
-        'userid'     => $USER->id,
+        'instanceid'     => $instanceid,
+        'userid'         => $USER->id,
+        'payment_status' => 0,
     ]);
     redirect($returnurl);
 }
@@ -62,19 +63,39 @@ if ($coupon->max_uses > 0) {
 $transaction = $DB->start_delegated_transaction();
 
 try {
-    $alreadyused = $DB->record_exists(COUPON_USAGE_TABLE, [
+    $existingusage = $DB->get_record(COUPON_USAGE_TABLE, [
         'instanceid' => $instanceid,
         'userid'     => $USER->id,
         'couponid'   => $coupon->id,
     ]);
-    if ($alreadyused) {
-        $transaction->rollback(new moodle_exception('couponalreadyused', COUPON_PLUGIN));
+
+    if ($existingusage) {
+        if ((int) $existingusage->payment_status === 1) {
+            // Already paid — show descriptive error.
+            $transaction->allow_commit();
+            redirect($returnurl, get_string('couponalreadyused', COUPON_PLUGIN), null,
+                     \core\output\notification::NOTIFY_ERROR);
+        }
+
+        // Applied but not yet paid — re-apply session and redirect to payment.
+        if (!isset($SESSION->coupon_discount)) {
+            $SESSION->coupon_discount = [];
+        }
+        $SESSION->coupon_discount[$instanceid] = [
+            'code'             => $coupon->code,
+            'discount_percent' => (float) $coupon->discount_percent,
+        ];
+        $transaction->allow_commit();
+        redirect($returnurl, get_string('couponpendingpayment', COUPON_PLUGIN), null,
+                 \core\output\notification::NOTIFY_INFO);
     }
 
     if ($coupon->max_uses > 0) {
         $totaluses = $DB->count_records(COUPON_USAGE_TABLE, ['couponid' => $coupon->id]);
         if ($totaluses >= $coupon->max_uses) {
-            $transaction->rollback(new moodle_exception('couponmaxusesreached', COUPON_PLUGIN));
+            $transaction->allow_commit();
+            redirect($returnurl, get_string('couponmaxusesreached', COUPON_PLUGIN), null,
+                     \core\output\notification::NOTIFY_ERROR);
         }
     }
 
@@ -87,8 +108,9 @@ try {
     ];
 
     $DB->delete_records(COUPON_USAGE_TABLE, [
-        'instanceid' => $instanceid,
-        'userid'     => $USER->id,
+        'instanceid'     => $instanceid,
+        'userid'         => $USER->id,
+        'payment_status' => 0,
     ]);
 
     $usage                   = new stdClass();
@@ -97,6 +119,7 @@ try {
     $usage->couponid         = $coupon->id;
     $usage->discount_percent = (float) $coupon->discount_percent;
     $usage->timecreated      = time();
+    $usage->payment_status   = 0;
     $DB->insert_record(COUPON_USAGE_TABLE, $usage);
 
     $event = \enrol_coupon_discount\event\coupon_applied::create([
@@ -113,6 +136,10 @@ try {
 
     $transaction->allow_commit();
 } catch (Exception $e) {
-    $transaction->rollback($e);
+    if ($transaction && !$transaction->is_disposed()) {
+        $transaction->rollback($e);
+    }
+    redirect($returnurl, $e->getMessage(), null, \core\output\notification::NOTIFY_ERROR);
 }
 redirect($returnurl);
+

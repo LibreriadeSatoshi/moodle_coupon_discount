@@ -65,18 +65,67 @@ php admin/cli/upgrade.php
 ## Features
 
 - **Coupon System**: Apply percentage-based discounts to course enrolment fees.
+- **Payment Status Tracking**: Tracks whether a coupon usage has been paid or is still pending, preventing duplicate use while allowing retry for incomplete payments.
+- **Coupon Management**: Admin interface to create, edit, and delete coupons with support for max uses, expiry dates, allowed emails, and descriptions.
 - **Modern UI**: Enhanced payment interface with a clean aesthetic and micro-animations.
 - **Gateway Agnostic**: Seamlessly integrates with any payment gateway enabled in Moodle (BTCPay, Stripe, PayPal, etc.) via the standard `core_payment` API.
+- **Multilingual**: Full support for English and Spanish (`lang/en`, `lang/es`).
+- **Event Logging**: Logs coupon usage via Moodle's standard event system for auditing.
+
+## Coupon Verification Flow
+
+When a user applies a coupon code, the plugin follows this decision flow:
+
+```mermaid
+flowchart TD
+    A["User applies coupon"] --> B{"Does a usage record exist?"}
+    B -->|No| C["Create usage record (payment_status=0)"]
+    C --> D["Redirect to payment page"]
+    B -->|Yes| E{"payment_status?"}
+    E -->|"0 (pending)"| F["Re-apply session discount"]
+    F --> D
+    E -->|"1 (paid)"| G["Error: coupon already used and paid"]
+    D --> H["User pays via gateway"]
+    H --> I["Moodle calls deliver_order()"]
+    I --> J["Enrol user + set payment_status=1"]
+```
+
+- **New coupon**: A usage record is created with `payment_status = 0` and the user is redirected to the payment page.
+- **Coupon applied but not yet paid**: The session discount is re-applied and the user is redirected back to the payment page to complete the transaction.
+- **Coupon already paid**: A descriptive error is shown, preventing re-use.
 
 ## Database Tables
 
 | Table | Purpose |
 | :--- | :--- |
-| `enrol_coupon_discount_codes` | Stores available coupon codes and their discount percentages. |
-| `enrol_coupon_discount_usage` | Tracks which coupon a user has applied for a given enrolment instance, persisting across gateway redirects. |
+| `enrol_coupon_discount_codes` | Stores available coupon codes, discount percentages, allowed emails, expiry dates, descriptions, and max usage limits. |
+| `enrol_coupon_discount_usage` | Tracks which coupon a user has applied for a given enrolment instance, including payment status (`0 = pending`, `1 = paid`). Records are preserved after payment to prevent coupon re-use. |
+
+### `enrol_coupon_discount_codes` columns
+
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `id` | INT | Primary key |
+| `code` | CHAR(50) | The coupon code (stored uppercase, unique) |
+| `discount_percent` | DECIMAL(5,2) | Percentage discount (e.g. 10.00 for 10%) |
+| `allowed_emails` | TEXT | Comma-separated list of allowed emails (empty = all users) |
+| `expirydate` | INT | Unix timestamp of expiry (0 = never expires) |
+| `description` | TEXT | Optional description of the coupon |
+| `max_uses` | INT | Maximum uses across all users (0 = unlimited) |
+| `timecreated` | INT | Unix timestamp of creation |
+
+### `enrol_coupon_discount_usage` columns
+
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `id` | INT | Primary key |
+| `instanceid` | INT | Enrol instance ID |
+| `userid` | INT | User ID |
+| `couponid` | INT | Coupon ID |
+| `discount_percent` | DECIMAL(5,2) | Discount percentage applied |
+| `timecreated` | INT | Unix timestamp of when the coupon was applied |
+| `payment_status` | INT(1) | `0` = pending payment, `1` = paid |
 
 ## License
 
 This project is open-source and licensed under the [MIT License](LICENSE).
-
-

@@ -25,8 +25,9 @@ class service_provider implements \core_payment\local\callback\service_provider 
 
         } elseif (isloggedin() && !isguestuser()) {
             $usage = $DB->get_record('enrol_coupon_discount_usage', [
-                'instanceid' => $instanceid,
-                'userid'     => $USER->id,
+                'instanceid'     => $instanceid,
+                'userid'         => $USER->id,
+                'payment_status' => 0,
             ]);
             if ($usage) {
                 $cost = $cost - ($cost * ($usage->discount_percent / 100));
@@ -83,7 +84,8 @@ class service_provider implements \core_payment\local\callback\service_provider 
 
         $plugin->enrol_user($instance, $userid, $instance->roleid, $timestart, $timeend);
 
-        $DB->delete_records('enrol_coupon_discount_usage', [
+        // Mark coupon usage as paid (keep record for history — prevents re-use).
+        $DB->set_field('enrol_coupon_discount_usage', 'payment_status', 1, [
             'instanceid' => $instanceid,
             'userid'     => $userid,
         ]);
