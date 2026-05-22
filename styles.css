@@ -144,3 +144,12 @@
 .animate_price {
     animation: pricePop 0.4s ease;
 }
+
+/* Align "Manage coupon codes" link with plugin headings */
+#admin-enrol_coupon_discount_managecoupons .form-label {
+    width: 100%;
+    max-width: 100%;
+    flex: 0 0 100%;
+    text-align: left;
+    padding-left: 0;
+}
