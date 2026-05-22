@@ -93,7 +93,7 @@ try {
 
     $usage                   = new stdClass();
     $usage->instanceid       = $instanceid;
-    $usage->userid           => $USER->id;
+    $usage->userid           = $USER->id;
     $usage->couponid         = $coupon->id;
     $usage->discount_percent = (float) $coupon->discount_percent;
     $usage->timecreated      = time();
