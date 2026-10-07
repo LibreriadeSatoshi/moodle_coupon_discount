@@ -203,11 +203,22 @@ class provider implements
         if (!self::supported_context($context)) {
             return;
         }
+        $transaction = $DB->start_delegated_transaction();
+        // Checkout enforces max_uses by counting usage rows, including pending reservations.
+        // Retain only anonymous counts, removing the user, course, timestamp, and payment details.
         [$sql, $params] = self::record_query('d.id', $context, $userids);
-        $DB->delete_records_subquery('enrol_coupon_discount_usage', 'id', 'id', $sql, $params);
+        $usage = $DB->get_recordset_sql($sql, $params);
+        foreach ($usage as $record) {
+            $DB->update_record('enrol_coupon_discount_usage', (object) [
+                'id' => $record->id, 'userid' => 0, 'instanceid' => 0,
+                'timecreated' => 0, 'discount_percent' => 0, 'payment_status' => 0,
+            ]);
+        }
+        $usage->close();
         [$sql, $params] = self::record_query('d.id', $context, $userids, true);
         \core_payment\privacy\provider::delete_data_for_payment_sql($sql, $params);
         if (!$context instanceof \context_system) {
+            $transaction->allow_commit();
             return;
         }
         $emails = null;
@@ -216,6 +227,27 @@ class provider implements
             $emails = array_map(fn($email) => \core_text::strtolower(trim($email)),
                 $DB->get_fieldset_select('user', 'email', 'id ' . $insql, $params));
         }
+        self::delete_email_restrictions($emails);
+        $transaction->allow_commit();
+    }
+
+    /**
+     * Remove email eligibility using the original address provided by core's deletion event.
+     * @param \core\event\user_deleted $event Account deletion event
+     */
+    public static function user_deleted(\core\event\user_deleted $event): void {
+        $email = $event->other['email'] ?? '';
+        if ($email !== '') {
+            self::delete_email_restrictions([\core_text::strtolower(trim($email))]);
+        }
+    }
+
+    /**
+     * Remove exact email restrictions without making private coupons public.
+     * @param array|null $emails Normalized addresses, or null to remove all restrictions
+     */
+    private static function delete_email_restrictions(?array $emails): void {
+        global $DB;
         $coupons = $DB->get_recordset('enrol_coupon_discount_codes');
         foreach ($coupons as $coupon) {
             $allowed = self::email_list($coupon->allowed_emails);
@@ -247,7 +279,7 @@ class provider implements
         $sql = "SELECT $fields FROM {{$table}} d
             LEFT JOIN {enrol} e ON e.id = d.$instancefield AND e.enrol = :enrol
             LEFT JOIN {context} c ON c.instanceid = e.courseid AND c.contextlevel = :level
-            WHERE 1 = 1";
+            WHERE d.userid > 0";
         $params = ['enrol' => 'coupon_discount', 'level' => CONTEXT_COURSE];
         if ($payments) {
             $sql .= ' AND d.component = :component';

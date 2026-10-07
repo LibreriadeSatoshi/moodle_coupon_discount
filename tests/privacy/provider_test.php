@@ -115,7 +115,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         $f = $this->fixture;
         provider::delete_data_for_user(new approved_contextlist($f['alice'], 'enrol_coupon_discount', [$f['context']->id]));
         $this->assertEqualsCanonicalizing(array_slice($f['usages'], 1),
-            array_keys($DB->get_records('enrol_coupon_discount_usage')));
+            array_keys($DB->get_records_select('enrol_coupon_discount_usage', 'userid > 0')));
         $this->assertFalse($DB->record_exists('payments', ['id' => $f['payment']]));
         $this->assertSame('alice@example.com, bob@example.com',
             $DB->get_field('enrol_coupon_discount_codes', 'allowed_emails', ['id' => $f['coupon']]));
@@ -127,9 +127,9 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         $f = $this->fixture;
         provider::delete_data_for_users(new approved_userlist($f['context'], 'enrol_coupon_discount', [$f['bob']->id]));
         $this->assertEqualsCanonicalizing([$f['usages'][0], $f['usages'][2], $f['usages'][3]],
-            array_keys($DB->get_records('enrol_coupon_discount_usage')));
+            array_keys($DB->get_records_select('enrol_coupon_discount_usage', 'userid > 0')));
         provider::delete_data_for_users(new approved_userlist($f['context'], 'enrol_coupon_discount', []));
-        $this->assertEquals(3, $DB->count_records('enrol_coupon_discount_usage'));
+        $this->assertEquals(3, $DB->count_records_select('enrol_coupon_discount_usage', 'userid > 0'));
         $this->assertTrue($DB->record_exists('payments', ['id' => $f['payment']]));
     }
 
@@ -139,7 +139,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         $f = $this->fixture;
         provider::delete_data_for_all_users_in_context($f['context']);
         $this->assertEqualsCanonicalizing([$f['usages'][2], $f['usages'][3]],
-            array_keys($DB->get_records('enrol_coupon_discount_usage')));
+            array_keys($DB->get_records_select('enrol_coupon_discount_usage', 'userid > 0')));
         $this->assertFalse($DB->record_exists('payments', ['id' => $f['payment']]));
     }
 
@@ -148,8 +148,9 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         global $DB;
         $f = $this->fixture;
         provider::delete_data_for_user(new approved_contextlist($f['alice'], 'enrol_coupon_discount', [SYSCONTEXTID]));
-        $this->assertFalse($DB->record_exists('enrol_coupon_discount_usage', ['id' => $f['usages'][3]]));
-        $this->assertEquals(3, $DB->count_records('enrol_coupon_discount_usage'));
+        $this->assertFalse($DB->record_exists('enrol_coupon_discount_usage',
+            ['id' => $f['usages'][3], 'userid' => $f['alice']->id]));
+        $this->assertEquals(3, $DB->count_records_select('enrol_coupon_discount_usage', 'userid > 0'));
         $this->assertSame('bob@example.com',
             $DB->get_field('enrol_coupon_discount_codes', 'allowed_emails', ['id' => $f['coupon']]));
         provider::delete_data_for_users(new approved_userlist(\context_system::instance(),
@@ -223,12 +224,56 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         ]);
         provider::delete_data_for_all_users_in_context(\context_system::instance());
         $this->assertEqualsCanonicalizing(array_slice($f['usages'], 0, 3),
-            array_keys($DB->get_records('enrol_coupon_discount_usage')));
+            array_keys($DB->get_records_select('enrol_coupon_discount_usage', 'userid > 0')));
         $this->assertTrue($DB->record_exists('payments', ['id' => $f['payment']]));
         $coupon = $DB->get_record('enrol_coupon_discount_codes', ['id' => $f['coupon']], '*', MUST_EXIST);
         $this->assertEmpty($coupon->allowed_emails);
         $this->assertEquals(1, $coupon->expirydate);
         $this->assertEquals(0, $DB->get_field('enrol_coupon_discount_codes', 'expirydate', ['id' => $publiccoupon]));
+    }
+
+    /** Privacy erasure must not replenish the shared coupon redemption budget. */
+    public function test_erasure_preserves_coupon_usage_budget(): void {
+        global $DB;
+        $f = $this->fixture;
+        $DB->set_field('enrol_coupon_discount_usage', 'payment_status', 0, ['id' => $f['usages'][0]]);
+        $DB->set_field('enrol_coupon_discount_codes', 'max_uses', 4, ['id' => $f['coupon']]);
+        $DB->set_field('enrol_coupon_discount_codes', 'allowed_emails', '', ['id' => $f['coupon']]);
+        provider::delete_data_for_user(new approved_contextlist($f['alice'], 'enrol_coupon_discount',
+            [$f['context']->id, $f['othercontext']->id, SYSCONTEXTID]));
+        // Checkout counts every usage of this coupon, across all courses and users.
+        $this->assertEquals(4, $DB->count_records('enrol_coupon_discount_usage', ['couponid' => $f['coupon']]));
+        $this->assertFalse($DB->record_exists('enrol_coupon_discount_usage', ['userid' => $f['alice']->id]));
+        $this->assertEmpty(provider::get_contexts_for_userid($f['alice']->id)->get_contextids());
+        $users = new userlist(\context_system::instance(), 'enrol_coupon_discount');
+        provider::get_users_in_context($users);
+        $this->assertEmpty($users->get_userids());
+        $this->assertEmpty(provider::get_contexts_for_userid(0)->get_contextids());
+        foreach ($DB->get_records('enrol_coupon_discount_usage', ['userid' => 0]) as $anonymous) {
+            $this->assertEquals(0, $anonymous->instanceid);
+            $this->assertEquals(0, $anonymous->timecreated);
+            $this->assertEquals(0, $anonymous->discount_percent);
+            $this->assertEquals(0, $anonymous->payment_status);
+        }
+        provider::delete_data_for_user(new approved_contextlist($f['alice'], 'enrol_coupon_discount',
+            [$f['context']->id, $f['othercontext']->id, SYSCONTEXTID]));
+        provider::delete_data_for_all_users_in_context(\context_system::instance());
+        $this->assertEquals(4, $DB->count_records('enrol_coupon_discount_usage', ['couponid' => $f['coupon']]));
+    }
+
+    /** Account deletion uses the original email even after core obscures the stored address. */
+    public function test_account_deletion_removes_email_restrictions(): void {
+        global $DB;
+        $f = $this->fixture;
+        $this->setAdminUser();
+        $this->assertTrue(delete_user($f['alice']));
+        $this->assertNotSame($f['alice']->email, $DB->get_field('user', 'email', ['id' => $f['alice']->id]));
+        $this->assertSame('bob@example.com',
+            $DB->get_field('enrol_coupon_discount_codes', 'allowed_emails', ['id' => $f['coupon']]));
+        $this->assertTrue(delete_user($f['bob']));
+        $coupon = $DB->get_record('enrol_coupon_discount_codes', ['id' => $f['coupon']], '*', MUST_EXIST);
+        $this->assertSame('', $coupon->allowed_emails);
+        $this->assertEquals(1, $coupon->expirydate);
     }
 
 }
