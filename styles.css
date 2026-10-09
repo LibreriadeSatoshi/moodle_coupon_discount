@@ -17,7 +17,7 @@
     font-size: 1.2rem;
     font-weight: 700;
     margin-bottom: 15px;
-    color: var(--primary, #F7931A);
+    color: var(--primary, #f7931a);
     display: flex;
     align-items: center;
     gap: 10px;
@@ -28,7 +28,7 @@
     padding: 15px;
     background: var(--tertiary-bg, rgba(0, 0, 0, 0.04));
     border-radius: 8px;
-    border-left: 4px solid var(--primary, #F7931A);
+    border-left: 4px solid var(--primary, #f7931a);
 }
 
 .enrol_coupon_discount_price_box .original_price {
@@ -58,7 +58,7 @@
 .enrol_coupon_discount_input_group input[type="text"] {
     width: 100%;
     padding: 10px 14px;
-    background: var(--input-bg, #ffffff);
+    background: var(--input-bg, #fff);
     border: 1px solid var(--border-color, #ced4da);
     border-radius: 8px;
     color: var(--text-color, #212529);
@@ -67,13 +67,13 @@
 }
 
 .enrol_coupon_discount_input_group input[type="text"]:focus {
-    border-color: var(--primary, #F7931A);
+    border-color: var(--primary, #f7931a);
     outline: none;
     box-shadow: 0 0 0 3px rgba(247, 147, 26, 0.15);
 }
 
 .enrol_coupon_discount_btn_apply {
-    background: linear-gradient(135deg, var(--primary, #F7931A) 0%, #FFAB40 100%);
+    background: linear-gradient(135deg, var(--primary, #f7931a) 0%, #ffab40 100%);
     border: none;
     border-radius: 8px;
     padding: 10px 16px;
@@ -89,7 +89,7 @@
 }
 
 .enrol_coupon_discount_btn_pay {
-    background: var(--primary, #F7931A);
+    background: var(--primary, #f7931a);
     color: #1a0a00;
     border: none;
     border-radius: 8px;
@@ -133,7 +133,7 @@
 
     50% {
         transform: scale(1.08);
-        color: var(--primary, #F7931A);
+        color: var(--primary, #f7931a);
     }
 
     100% {

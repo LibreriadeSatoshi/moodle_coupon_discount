@@ -2,6 +2,10 @@
 // This file is part of Moodle - http://moodle.org/
 
 $string['pluginname'] = 'Coupon Discount';
+$string['coupon_discount:config'] = 'Configure Coupon Discount enrolment instances';
+$string['coupon_discount:manage'] = 'Manage users enrolled with Coupon Discount';
+$string['coupon_discount:unenrol'] = 'Unenrol users enrolled with Coupon Discount';
+$string['coupon_discount:unenrolself'] = 'Unenrol self from a course using Coupon Discount';
 $string['couponcode'] = 'Coupon Code';
 $string['applycoupon'] = 'Apply Coupon';
 $string['couponapplied'] = 'Coupon applied successfully. Discount: {$a}';
@@ -66,3 +70,13 @@ $string['cancel'] = 'Cancel';
 $string['unlimited'] = 'Unlimited';
 $string['invalidcost'] = 'Cost must be a valid positive number.';
 
+$string['privacy:metadata:codes'] = 'Coupon eligibility restrictions contain email addresses.';
+$string['privacy:metadata:codes:allowed_emails'] = 'Email addresses allowed to use a restricted coupon.';
+$string['privacy:metadata:payments'] = 'Payment details are stored by the core payment subsystem.';
+$string['privacy:metadata:usage'] = 'Coupon usage and payment status for enrolments.';
+$string['privacy:metadata:usage:couponid'] = 'The coupon used.';
+$string['privacy:metadata:usage:discount_percent'] = 'The discount applied to the enrolment.';
+$string['privacy:metadata:usage:instanceid'] = 'The enrolment instance where the coupon was applied.';
+$string['privacy:metadata:usage:payment_status'] = 'Whether payment for the discounted enrolment was completed.';
+$string['privacy:metadata:usage:timecreated'] = 'When the coupon was applied.';
+$string['privacy:metadata:usage:userid'] = 'The user who applied the coupon.';
